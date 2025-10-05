@@ -1,3 +1,4 @@
+using Microsoft.VisualBasic.Logging;
 using System;
 using System.Data.SqlClient;
 using System.Data.SQLite;
@@ -7,14 +8,143 @@ using System.Threading.Tasks;
 
 namespace WinFormsApp4
 {
+    // Глобальный класс для хранения данных приложения
+    public static class GlobalData
+    {
+        public static string CurrentLogin { get; set; } = string.Empty;
+        
+        public static void SetCurrentUser(string login)
+        {
+            CurrentLogin = login ?? string.Empty;
+        }
+        
+        public static void ClearCurrentUser()
+        {
+            CurrentLogin = string.Empty;
+        }
+        
+        public static bool IsUserLoggedIn()
+        {
+            return !string.IsNullOrEmpty(CurrentLogin);
+        }
+    }
+
     public partial class Form1 : Form
     {
         public Form1()
         {
-            InitializeComponent();
-            createbdtransaction();
+            InitializeComponent();  
             createbduser();
         }
+
+
+        private async Task<bool> vakidateuser(string Login, string Password)
+        {
+            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
+            {
+                MessageBox.Show("Введите логин и пароль!");
+                return false;
+            }
+
+            string dbPath = GetDatabasePath();
+            if (!File.Exists(dbPath))
+            {
+                MessageBox.Show("База данных не найдена!");
+                return false;
+            }
+
+            string hashpass;
+            try
+            {
+                hashpass = hashpqpass(Password);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при обработке пароля: " + ex.Message);
+                return false;
+            }
+
+            using (var das = new SQLiteConnection($"Data Source={dbPath}"))
+            {
+                await das.OpenAsync().ConfigureAwait(false);
+                try
+                {
+                    using (var gg = new SQLiteCommand("SELECT Password FROM Usersss WHERE Login = @L LIMIT 1", das))
+                    {
+                        gg.Parameters.AddWithValue("@L", Login);
+                        var value = await gg.ExecuteScalarAsync().ConfigureAwait(false);
+                        if (value == null || value == DBNull.Value)
+                        {
+                            MessageBox.Show("Пользователь с таким логином не найден!");
+                            return false;
+                        }
+                        string pasd = Convert.ToString(value);
+                        bool isValid = string.Equals(pasd, hashpass, StringComparison.Ordinal);
+
+                        if (!isValid)
+                        {
+                            MessageBox.Show("Неверный пароль!");
+                        }
+
+                        return isValid;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при проверке пользователя: " + ex.Message);
+                }
+            }
+            return false;
+        }
+
+        public async Task<bool> Loginproverka()
+        {
+            string login = textBox1.Text;
+
+            if (string.IsNullOrEmpty(login))
+            {
+                MessageBox.Show("Введите логин!");
+                return false;
+            }
+            try
+            {
+                string dbPath = GetDatabasePath();
+                using (var das = new SQLiteConnection($"Data Source={dbPath}"))
+                {
+                    das.OpenAsync().ConfigureAwait(false);
+                    using (var commandsql = new SQLiteCommand($"SELECT COUNT(*) FROM Usersss WHERE Login = @L", das))
+                    {
+                        commandsql.Parameters.AddWithValue("@L", login);
+                        var result = await commandsql.ExecuteScalarAsync().ConfigureAwait(false);
+
+                        if (result == null && result == DBNull.Value)
+                        {
+                            return false;
+                        }
+                        int count = Convert.ToInt32(result);
+
+                        if (count == 0)
+                        {
+                            return true;
+                        }
+
+                        if (count <= 1)
+                        {
+                            return false;
+                        }
+                        return false;
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка проверки пароля {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+
 
         private string hashpqpass(string Password)
         {
@@ -42,41 +172,54 @@ namespace WinFormsApp4
                 throw;
             }
         }
-        public async Task saveUser()
+        public async Task<bool> saveUser()
         {
             string Login = textBox1.Text;
             string Password = textBox2.Text;
-            if (!string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(Password))
+
+            if (await Loginproverka().ConfigureAwait(false))
             {
-                try
+                if (!string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(Password))
                 {
-                    string hashPassword = hashpqpass(Password);
                     try
                     {
-                        string dbPath = GetDatabasePath();
-                        using (var das = new SQLiteConnection($"Data Source={dbPath}"))
+                        string hashPassword = hashpqpass(Password);
+                        try
                         {
-                            await das.OpenAsync().ConfigureAwait(false);
-                            var dass = new SQLiteCommand($"INSERT INTO [USERS] (Login,Password) VALUES (@L,@P)", das);
-                            dass.Parameters.AddWithValue("@L", Login);
-                            dass.Parameters.AddWithValue("@P", hashPassword);
-                            await dass.ExecuteNonQueryAsync().ConfigureAwait(false);
-                            MessageBox.Show("Данные сохранены");
+                            string dbPath = GetDatabasePath();
+                            using (var das = new SQLiteConnection($"Data Source={dbPath}"))
+                            {
+                                await das.OpenAsync().ConfigureAwait(false);
+                                var dass = new SQLiteCommand($"INSERT INTO [Usersss] (Login,Password) VALUES (@L,@P)", das);
+                                dass.Parameters.AddWithValue("@L", Login);
+                                dass.Parameters.AddWithValue("@P", hashPassword);
+                                await dass.ExecuteNonQueryAsync().ConfigureAwait(false);
+                                MessageBox.Show("Данные сохранены");
+                                return true;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Ошибка сохранения данных {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return false;
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Ошибка сохранения данных {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Ошибка при хэшировании данных: " + ex.Message);
+                        return false;
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show("Ошибка при хэшировании данных: " + ex.Message);
+                    MessageBox.Show("Заполните все поля", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
                 }
             }
-            else 
+            else
             {
-                MessageBox.Show("Заполните все поля","Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Такой логин уже существует! Выберите другой логин.");
+                return false;
             }
         }
         public string GetDatabasePath()
@@ -173,6 +316,9 @@ namespace WinFormsApp4
                 }
             }
         }
+
+
+
         public async Task createbduser()
         {
             try
@@ -183,10 +329,13 @@ namespace WinFormsApp4
                 using (var das = new SQLiteConnection($"Data Source={dbPath}"))
                 {
                     await das.OpenAsync().ConfigureAwait(false);
-                    string createTableCommand = @"CREATE TABLE IF NOT EXISTS [Users] (
+                    string createTableCommand = @"CREATE TABLE IF NOT EXISTS [Usersss] (
                                  [ID] INTEGER PRIMARY KEY AUTOINCREMENT,
-                                 [Login] TEXT NOT NULL UNIQUE,
-                                 [Password] TEXT NOT NULL
+                                 [Login]  UNIQUE,
+                                 [Password],
+                                 [Name],
+                                 [Summ],
+                                 [What] 
                              );";
 
                     using (var command = new SQLiteCommand(createTableCommand, das))
@@ -201,116 +350,7 @@ namespace WinFormsApp4
                 MessageBox.Show($"EROR Users: {ex.Message}\nПуть к БД: {dbPath}", "SQLite", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        public async Task createbdtransaction()
-        {
-            try
-            {
-                string dbPath = GetDatabasePath();
-                //MessageBox.Show($"Путь к БД Transaction: {dbPath}", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Проверяем, что путь не null и не пустой
-                if (string.IsNullOrEmpty(dbPath))
-                {
-                    MessageBox.Show("Ошибка: путь к базе данных пустой!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                //MessageBox.Show("Создаем соединение с БД...", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Дополнительные проверки перед созданием соединения
-                //MessageBox.Show($"Проверяем dbPath: '{dbPath}' (Length: {dbPath?.Length ?? 0})", "Детальная отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                if (string.IsNullOrEmpty(dbPath))
-                {
-                    MessageBox.Show("КРИТИЧЕСКАЯ ОШИБКА: dbPath пустой!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                // Попробуем создать строку подключения пошагово
-                string connectionString;
-                try
-                {
-                    connectionString = $"Data Source={dbPath}";
-                    //MessageBox.Show($"Строка подключения создана: '{connectionString}'", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при создании строки подключения: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                // Попробуем создать соединение с дополнительными параметрами
-                try
-                {
-                    //MessageBox.Show("Пытаемся создать SQLiteConnection...", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // Альтернативная строка подключения с дополнительными параметрами
-                    string enhancedConnectionString = $"Data Source={dbPath};Version=3;New=True;Compress=True;";
-                    //MessageBox.Show($"Используем расширенную строку: {enhancedConnectionString}", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    using (var das = new SQLiteConnection(enhancedConnectionString))
-                    {
-                        //MessageBox.Show("Открываем соединение...", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        await das.OpenAsync().ConfigureAwait(false);
-
-                        //MessageBox.Show("Соединение открыто, создаем команду...", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        string createTableCommand =
-                            @"CREATE TABLE IF NOT EXISTS [Tranzaction](
-                        [ID] INTEGER PRIMARY KEY AUTOINCREMENT,
-                        [Name] TEXT NOT NULL,
-                        [Summ] TEXT NOT NULL,
-                        [What] TEXT NOT NULL
-                         )";
-
-                        //MessageBox.Show($"SQL команда: {createTableCommand}", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        using (var command = new SQLiteCommand(createTableCommand, das))
-                        {
-                            //MessageBox.Show("Выполняем команду...", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                            //MessageBox.Show("Команда выполнена успешно!", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                    }
-                }
-                catch (Exception connEx)
-                {
-                    MessageBox.Show($"Ошибка при создании/использовании соединения: {connEx.Message}\nStackTrace: {connEx.StackTrace}", "Ошибка соединения", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                    // Попробуем упрощенную строку подключения
-                    try
-                    {
-                        MessageBox.Show("Пробуем упрощенную строку подключения...", "Резервный вариант", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        using (var das = new SQLiteConnection($"Data Source={dbPath}"))
-                        {
-                            await das.OpenAsync().ConfigureAwait(false);
-
-                            string createTableCommand =
-                                @"CREATE TABLE IF NOT EXISTS [Tranzaction](
-                            [ID] INTEGER PRIMARY KEY AUTOINCREMENT,
-                            [Name] TEXT NOT NULL,
-                            [Summ] TEXT NOT NULL,
-                            [What] TEXT NOT NULL
-                             )";
-
-                            using (var command = new SQLiteCommand(createTableCommand, das))
-                            {
-                                await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                MessageBox.Show("Таблица создана с упрощенной строкой подключения!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                        }
-                    }
-                    catch (Exception fallbackEx)
-                    {
-                        MessageBox.Show($"И резервный вариант не сработал: {fallbackEx.Message}", "Критическая ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-            finally
-            {
-
-            }
-        }
 
         private async void button1_Click(object sender, EventArgs e)
         {
@@ -322,7 +362,22 @@ namespace WinFormsApp4
             Form2 form2 = new Form2();
             form2.Show();
             this.Hide();
-            
+        }
+
+        private async void button3_Click(object sender, EventArgs e)
+        {
+            string Login = textBox1.Text;
+            string Password = textBox2.Text;
+            bool isValid = await vakidateuser(Login, Password);
+            if (isValid)
+            {
+                // Сохраняем логин в глобальную переменную
+                GlobalData.SetCurrentUser(Login);
+                
+                Form2 form2 = new Form2();
+                form2.Show();
+                this.Hide();
+            }
         }
     }
 }
