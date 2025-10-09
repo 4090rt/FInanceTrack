@@ -25,6 +25,11 @@ namespace WinFormsApp4
             filtretranzaction();
             //MessageBox.Show($"Min: {numericUpDown1.Minimum}, Max: {numericUpDown1.Maximum}");
         }
+
+
+
+
+        //основной метод фильтрации
         public async Task filtretranzaction()
         {
             try
@@ -34,7 +39,7 @@ namespace WinFormsApp4
 
                 if (!File.Exists(filePath))
                 {
-                    listView1.Items.Clear();
+                    File.Create(filePath).Dispose();
                     return;
                 }
 
@@ -55,6 +60,8 @@ namespace WinFormsApp4
                     }
                 }
 
+
+                // фильтр 1
                 listView1.Items.Clear();
                 string selectedFilter = comboBox2.Text?.Trim();
                 if (selectedFilter == "Показать только Транспорт")
@@ -69,6 +76,8 @@ namespace WinFormsApp4
                     }
                 }
 
+
+                // фильтр 2
                 else if (selectedFilter == "Показать только Переводы")
                 {
                     var filteredperevod = expenses.Where(e => e.category == "Переводы");
@@ -81,6 +90,9 @@ namespace WinFormsApp4
                     }
                 }
 
+
+
+                // фильтр 3
                 else if (selectedFilter == "Показать только Мед-услуги")
                 {
                     var filteredperevod = expenses.Where(e => e.category == "Мед-услуги");
@@ -93,6 +105,8 @@ namespace WinFormsApp4
                     }
                 }
 
+
+                // фильтр 4
                 else if (selectedFilter == "Показать только Магазины")
                 {
                     var filteredperevod = expenses.Where(e => e.category == "Магазины");
@@ -105,6 +119,8 @@ namespace WinFormsApp4
                     }
                 }
 
+
+                // фильтр 5
                 else if (selectedFilter == "Показать только Равзлечения")
                 {
                     var filteredperevod = expenses.Where(e => e.category == "Развлечения");
@@ -117,6 +133,9 @@ namespace WinFormsApp4
                     }
                 }
 
+
+
+                // фильтр 6
                 else if (selectedFilter == "Показать только Подписки")
                 {
                     var filteredperevod = expenses.Where(e => e.category == "Подписки");
@@ -129,6 +148,9 @@ namespace WinFormsApp4
                     }
                 }
 
+
+
+                // фильтр 7
                 else if (selectedFilter == "Показать только Прочее")
                 {
                     var filteredperevod = expenses.Where(e => e.category == "Прочее");
@@ -141,6 +163,8 @@ namespace WinFormsApp4
                     }
                 }
 
+
+                // фильтр 8
                 else if (selectedFilter == "Показать всё")
                 {
                     var filteredperevod = expenses;
@@ -159,6 +183,11 @@ namespace WinFormsApp4
                 MessageBox.Show($"Ошибка фильтрации: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
+
+
+        //информация о текущем пользователе
         private void UpdateUserInterface()
         {
             if (GlobalData.IsUserLoggedIn())
@@ -170,6 +199,10 @@ namespace WinFormsApp4
                 this.Text = "Транзакции - Не авторизован";
             }
         }
+
+
+
+
         //public async Task<bool> log()
         //{
         //    try
@@ -200,6 +233,8 @@ namespace WinFormsApp4
         //    }
         //}
 
+
+        // сохранение картинки
         public async Task saveTranzactiewonimage()
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -216,6 +251,11 @@ namespace WinFormsApp4
                 MessageBox.Show("Ошибка выбора", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
+
+
+        //массивы для numeric
         public void massivoperaciy()
         {
             string[] massivoperation = { "Переводы", "Мед-услуги", "Магазины", "Транспорт", "Равзлечения", "Подписки", "Прочее", "Показать всё" };
@@ -223,6 +263,12 @@ namespace WinFormsApp4
             string[] massivfilter = { "Показать всё", "Показать только Переводы", "Показать только Мед-услуги", "Показать только Магазины", "Показать только Транспорт", "Показать только Равзлечения", "Показать только Подписки", "Показать только Прочее" };
             comboBox2.Items.AddRange(massivfilter);
         }
+
+
+
+
+
+
 
         //public async Task saveTranzaction()
         //{
@@ -266,6 +312,11 @@ namespace WinFormsApp4
         //        MessageBox.Show("Заполните все поля", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
         //    }
         //}
+
+
+
+
+        //сохранение информации о транзакции
         public async Task saveTranzaction()
         {
             try
@@ -316,6 +367,11 @@ namespace WinFormsApp4
             }
         }
 
+
+
+
+
+        //показать транзакции
         public async Task pokazTranzaction()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -340,21 +396,30 @@ namespace WinFormsApp4
             }
         }
 
+
+        //сохранение транзакции по нажатию
         private async void pictureBox1_Click(object sender, EventArgs e)
         {
             await saveTranzaction();
         }
 
+
+        //сохранение картинки транзакции по нажатию
         private void button1_Click(object sender, EventArgs e)
         {
             saveTranzactiewonimage();
         }
 
+
+        //отображение транзакции по нажатию
         private async void button2_Click(object sender, EventArgs e)
         {
             await pokazTranzaction();
         }
 
+
+
+        //выход на основную форму
         private void Logout()
         {
             GlobalData.ClearCurrentUser();
@@ -364,11 +429,18 @@ namespace WinFormsApp4
             this.Close();
         }
 
+
+
+        // выход по нажатию
         private void button3_Click(object sender, EventArgs e)
         {
             Logout();
         }
 
+
+
+
+        //очистка информации о юзере
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             GlobalData.ClearCurrentUser();
@@ -376,11 +448,16 @@ namespace WinFormsApp4
         }
 
 
+
+
+        //кнопка очистки listbox
         private void button4_Click(object sender, EventArgs e)
         {
             listView1.Items.Clear();
         }
 
+
+        // настройка элементов формы
         private void Form2_Load(object sender, EventArgs e)
         {
             numericUpDown1.Maximum = 10000000;
@@ -397,6 +474,8 @@ namespace WinFormsApp4
                 listView1.Columns.Add("Дата", 150);
             }
         }
+
+        //обработчик показать/скрыть календарь
         int i = 0;
         private void button3_Click_1(object sender, EventArgs e)
         {

@@ -19,11 +19,19 @@ namespace WinFormsApp4
             InitializeComponent();
             massiv();
         }
+
+
+
+        //массив валют
         public void massiv()
         {
             string[] valute = {"EUR","USD","RUB" };
             comboBox2.Items.AddRange(valute);
         }
+
+
+
+        //валидация(авторизация юзера)
         private async Task<bool> vakidateuser(string Login, string Password)
         {
             if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
@@ -36,7 +44,9 @@ namespace WinFormsApp4
             if (!File.Exists(dbPath))
             {
                 MessageBox.Show("База данных не найдена!");
-                return false;
+                MessageBox.Show("Подождите..База данных создается");
+                createbduser();
+                return true;
             }
 
             string hashpass;
@@ -61,7 +71,7 @@ namespace WinFormsApp4
                         var value = await gg.ExecuteScalarAsync().ConfigureAwait(false);
                         if (value == null || value == DBNull.Value)
                         {
-                            MessageBox.Show("Пользователь с таким логином не найден!");
+                            MessageBox.Show("Пользователь с таким логином не найден! Зарегестрируйтесь!");
                             return false;
                         }
                         string pasd = Convert.ToString(value);
@@ -83,6 +93,14 @@ namespace WinFormsApp4
             return false;
         }
 
+
+
+
+
+
+
+
+        //Проверка логина на уникальность
         public async Task<bool> Loginproverka()
         {
             string login = textBox1.Text;
@@ -131,7 +149,7 @@ namespace WinFormsApp4
         }
 
 
-
+        //хэширование пароля
         private string hashpqpass(string Password)
         {
             try
@@ -158,6 +176,10 @@ namespace WinFormsApp4
                 throw;
             }
         }
+
+
+
+        //сохранение юзера в базу данных
         public async Task<bool> saveUser()
         {
             string Login = textBox1.Text;
@@ -210,6 +232,10 @@ namespace WinFormsApp4
                 return false;
             }
         }
+
+
+
+        // получение все возможных путей расположения бд
         public string GetDatabasePath()
         {
             try
@@ -306,7 +332,7 @@ namespace WinFormsApp4
         }
 
 
-
+        // создание бд
         public async Task createbduser()
         {
             try
@@ -337,12 +363,15 @@ namespace WinFormsApp4
                 MessageBox.Show($"EROR Users: {ex.Message}\nПуть к БД: {dbPath}", "SQLite", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
+        //регистрация(сохранения юзера)
         private async void button1_Click(object sender, EventArgs e)
         {
             await saveUser();
         }
 
+
+
+        //авторизация юзера
         private async void button2_Click(object sender, EventArgs e)
         {
             string Login = textBox1.Text;
