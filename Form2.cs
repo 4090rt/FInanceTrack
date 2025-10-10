@@ -23,8 +23,43 @@ namespace WinFormsApp4
             massivoperaciy();
             comboBox2.SelectedIndexChanged += async (s, e) => await filtretranzaction();
             filtretranzaction();
+            valutelocal();
             //MessageBox.Show($"Min: {numericUpDown1.Minimum}, Max: {numericUpDown1.Maximum}");
         }
+
+
+
+        public async Task<bool> valutelocal()
+        {
+            try
+            {
+                Form3 form = new Form3();
+                string dbPath = form.GetDatabasePath();
+                using (SQLiteConnection connection = new SQLiteConnection($"Data Source={dbPath}"))
+                {
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    using (var aa = new SQLiteCommand("SELECT Valute FROM Usersss WHERE Login = @L", connection))
+                    {
+                        aa.Parameters.AddWithValue("@L", GlobalData.CurrentLogin);
+                        var result = await aa.ExecuteScalarAsync().ConfigureAwait(false);
+                        if (result != null && result != DBNull.Value)
+                        {
+                            textBox1.Text = result.ToString();
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("не удалось определить текущую валюту", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+        }
+
+
+
 
 
 
