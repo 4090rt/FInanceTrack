@@ -25,14 +25,14 @@ namespace WinFormsApp4
         //массив валют
         public void massiv()
         {
-            string[] valute = {"EUR","USD","RUB" };
+            string[] valute = { "EUR", "USD", "RUB" };
             comboBox2.Items.AddRange(valute);
         }
 
 
 
         //валидация(авторизация юзера)
-        private async Task<bool> vakidateuser(string Login, string Password)
+        public async Task<bool> vakidateuser(string Login, string Password)
         {
             if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
             {
@@ -97,9 +97,6 @@ namespace WinFormsApp4
 
 
 
-
-
-
         //Проверка логина на уникальность
         public async Task<bool> Loginproverka()
         {
@@ -150,7 +147,7 @@ namespace WinFormsApp4
 
 
         //хэширование пароля
-        private string hashpqpass(string Password)
+        public string hashpqpass(string Password)
         {
             try
             {
@@ -202,7 +199,7 @@ namespace WinFormsApp4
                                 var dass = new SQLiteCommand($"INSERT INTO [Usersss] (Login,Password,Valute) VALUES (@L,@P,@V)", das);
                                 dass.Parameters.AddWithValue("@L", Login);
                                 dass.Parameters.AddWithValue("@P", hashPassword);
-                                dass.Parameters.AddWithValue("@V",valute);
+                                dass.Parameters.AddWithValue("@V", valute);
                                 await dass.ExecuteNonQueryAsync().ConfigureAwait(false);
                                 MessageBox.Show("Данные сохранены");
                                 return true;
@@ -379,9 +376,8 @@ namespace WinFormsApp4
             bool isValid = await vakidateuser(Login, Password);
             if (isValid)
             {
-                // Сохраняем логин в глобальную переменную
-                GlobalData.SetCurrentUser(Login);
-
+                // Сохраняем логин и пароль в глобальную переменную
+                GlobalData.SetCurrentUser(Login, Password);
                 Form2 form2 = new Form2();
                 form2.Show();
                 this.Hide();
@@ -394,20 +390,38 @@ namespace WinFormsApp4
     public static class GlobalData
     {
         public static string CurrentLogin { get; set; } = string.Empty;
+        public static string CurrentPassword { get; set; } = string.Empty;
 
-        public static void SetCurrentUser(string login)
+        public static void SetCurrentUser(string login, string password = "")
         {
             CurrentLogin = login ?? string.Empty;
+            CurrentPassword = password ?? string.Empty;
         }
 
         public static void ClearCurrentUser()
         {
             CurrentLogin = string.Empty;
+            CurrentPassword = string.Empty;
         }
 
         public static bool IsUserLoggedIn()
         {
             return !string.IsNullOrEmpty(CurrentLogin);
+        }
+
+        public static void SetCurrentUserPas(string password)
+        {
+            CurrentPassword = password ?? string.Empty;
+        }
+
+        public static void ClearCurrentUserPas()
+        {
+            CurrentPassword = string.Empty;
+        }
+
+        public static bool IsUserLoggedInPas()
+        {
+            return !string.IsNullOrEmpty(CurrentPassword);
         }
     }
 }

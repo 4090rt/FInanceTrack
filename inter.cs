@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace WinFormsApp4
 {
-    internal class inter
+    public class inter
     {
         private readonly Gred _greeder;
         

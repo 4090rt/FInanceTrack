@@ -35,31 +35,22 @@ namespace WinFormsApp4
             {
                 Form3 form = new Form3();
                 string dbPath = form.GetDatabasePath();
-                using (SQLiteConnection connection = new SQLiteConnection($"Data Source={dbPath}"))
-                {
-                    await connection.OpenAsync().ConfigureAwait(false);
-                    using (var aa = new SQLiteCommand("SELECT Valute FROM Usersss WHERE Login = @L", connection))
-                    {
-                        aa.Parameters.AddWithValue("@L", GlobalData.CurrentLogin);
-                        var result = await aa.ExecuteScalarAsync().ConfigureAwait(false);
-                        if (result != null && result != DBNull.Value)
-                        {
-                            textBox1.Text = result.ToString();
-                            return true;
-                        }
-                        return false;
-                    }
-                }
+
+                var currencyService = new CurrencyService(dbPath);
+                string userCurrency = await currencyService.GetUserCurrencyAsync(GlobalData.CurrentLogin);
+
+                label1.Text = $"Текущая валюта: {userCurrency}";
+
+                var currencyInter = await CurrencyFactory.CreateCurrencyServiceAsync(userCurrency);
+                string currencyRates = await currencyInter.valutapros(userCurrency);
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("не удалось определить текущую валюту", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Не удалось определить текущую валюту: {ex.Message}", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
         }
-
-
-
 
 
 
@@ -225,7 +216,7 @@ namespace WinFormsApp4
         //информация о текущем пользователе
         private void UpdateUserInterface()
         {
-            if (GlobalData.IsUserLoggedIn())
+            if (GlobalData.IsUserLoggedIn() && GlobalData.IsUserLoggedInPas())
             {
                 this.Text = $"Транзакции - Пользователь: {GlobalData.CurrentLogin}";
             }
@@ -233,6 +224,8 @@ namespace WinFormsApp4
             {
                 this.Text = "Транзакции - Не авторизован";
             }
+
+
         }
 
 
@@ -359,7 +352,7 @@ namespace WinFormsApp4
                 string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 string filePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
                 DateTimePicker picker = new DateTimePicker();
-                DateTime selected = picker.Value; 
+                DateTime selected = picker.Value;
                 string Name = comboBox1.Text;
                 string time = selected.ToString();
                 Regex regex = new Regex(@"\p{L}");
@@ -445,7 +438,6 @@ namespace WinFormsApp4
             saveTranzactiewonimage();
         }
 
-
         //отображение транзакции по нажатию
         private async void button2_Click(object sender, EventArgs e)
         {
@@ -458,6 +450,7 @@ namespace WinFormsApp4
         private void Logout()
         {
             GlobalData.ClearCurrentUser();
+            GlobalData.ClearCurrentUserPas();
 
             Form3 form3 = new Form3();
             form3.Show();
@@ -479,6 +472,7 @@ namespace WinFormsApp4
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             GlobalData.ClearCurrentUser();
+            GlobalData.ClearCurrentUserPas();
             base.OnFormClosing(e);
         }
 
@@ -514,11 +508,49 @@ namespace WinFormsApp4
         int i = 0;
         private void button3_Click_1(object sender, EventArgs e)
         {
-            i++; 
-           if (i % 2 != 0)
-            monthCalendar1.Visible = true;
-           if (i % 2 == 0)
+            i++;
+            if (i % 2 != 0)
+                monthCalendar1.Visible = true;
+            if (i % 2 == 0)
                 monthCalendar1.Visible = false;
+        }
+
+        //обработчик кнопки курсов валют
+        private async void button5_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Form3 form = new Form3();
+                string dbPath = form.GetDatabasePath();
+
+                // Получаем валюту пользователя
+                var currencyService = new CurrencyService(dbPath);
+                string userCurrency = await currencyService.GetUserCurrencyAsync(GlobalData.CurrentLogin);
+
+                // Получаем курсы валют
+                var currencyInter = await CurrencyFactory.CreateCurrencyServiceAsync(userCurrency);
+                string currencyRates = await currencyInter.valutapros(userCurrency);
+
+                if (!string.IsNullOrEmpty(currencyRates))
+                {
+                    MessageBox.Show(currencyRates, $"Курсы валют для {userCurrency}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось получить курсы валют", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка получения курсов валют: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            smenadannix form = new smenadannix();
+            form.Show();
+            this.Hide();
         }
     }
 }
