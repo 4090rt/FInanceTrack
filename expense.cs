@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace WinFormsApp4
 {
+    //класс коснтруктор данных категория/сумма/дата
     internal class expense
     {
         public string category { get; set; }

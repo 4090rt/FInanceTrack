@@ -31,11 +31,16 @@ namespace WinFormsApp4
 
 
 
-
+    // класс интервейс(использование паттерна Dependency Injection)
     public interface Gred
     {
         public Task<string> valutezapros(string valute);
     }
+
+    // реализации вариации использования класса(разные данные, разная реакция на них Dependency Injection)
+
+
+    //реализация для рубля
     public class Rubvalute : Gred
     {
         public async Task<string> valutezapros(string valute)
@@ -105,6 +110,9 @@ namespace WinFormsApp4
         
     }
 
+
+
+    // реализация для доллара
     public class Usdvalute : Gred
     {
         public async Task<string> valutezapros(string valute)
@@ -170,6 +178,8 @@ namespace WinFormsApp4
 
     }
 
+    
+    // реализация для евро
     public class Eurvalute : Gred
     {
 

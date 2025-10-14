@@ -24,6 +24,7 @@ namespace WinFormsApp4
         }
 
 
+        // массив с доступными валютами
         public void massivoperaciy()
         {
             string[] massivvalute = { "RUB", "EUR", "USD" };
@@ -31,6 +32,8 @@ namespace WinFormsApp4
         }
 
 
+
+        // метод показывающий текущую валоюту 
         public async Task<bool> valutelocal()
         {
             try
@@ -52,7 +55,10 @@ namespace WinFormsApp4
                 return false;
             }
         }
+        
 
+
+        // метод смены валюты
         private async Task<bool> smenavalute()
         {
             string Valute = comboBox1.Text;
@@ -111,6 +117,8 @@ namespace WinFormsApp4
         }
 
 
+
+        // метод смены пароля
         private async Task<bool> smenaparolia()
         {
             string Passwordd = textBox1.Text;
@@ -168,11 +176,7 @@ namespace WinFormsApp4
             }
         }
 
-        private void smenadannix_Load(object sender, EventArgs e)
-        {
-
-        }
-
+        //КНОПКА СМЕНЫ валюты
         private async void button3_Click(object sender, EventArgs e)
         {
             string Valute = comboBox1.Text;
@@ -181,6 +185,9 @@ namespace WinFormsApp4
             await smenavalute();
         }
 
+
+
+        // кнопка смены пароля
         private async void button1_Click(object sender, EventArgs e)
         {
             await smenaparolia();

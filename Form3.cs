@@ -18,6 +18,7 @@ namespace WinFormsApp4
         {
             InitializeComponent();
             massiv();
+            pictures();
         }
 
 
@@ -27,9 +28,19 @@ namespace WinFormsApp4
         {
             string[] valute = { "EUR", "USD", "RUB" };
             comboBox2.Items.AddRange(valute);
+
         }
 
 
+
+        // работа с элементами формы
+        public void pictures()
+        {
+            pictureBox2.Image = Properties.Resources._2;
+            pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
+            button1.FlatStyle = FlatStyle.Popup;
+            button2.FlatStyle = FlatStyle.Popup;
+        }
 
         //валидация(авторизация юзера)
         public async Task<bool> vakidateuser(string Login, string Password)
@@ -44,7 +55,7 @@ namespace WinFormsApp4
             if (!File.Exists(dbPath))
             {
                 MessageBox.Show("База данных не найдена!");
-                MessageBox.Show("Подождите..База данных создается");
+                MessageBox.Show("Подождите.. База данных создается");
                 createbduser();
                 return true;
             }
@@ -160,7 +171,6 @@ namespace WinFormsApp4
                         for (int i = 0; i < bytes.Length; i++)
                         {
                             buider.Append(bytes[i].ToString("x2"));
-
                         }
                         return buider.ToString();
                     }
@@ -382,6 +392,35 @@ namespace WinFormsApp4
                 form2.Show();
                 this.Hide();
             }
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            smenadannix smenn = new smenadannix();
+            smenn.Show();
+            this.Hide();
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            smenadannix smenn = new smenadannix();
+            smenn.Show();
+            this.Hide();
+        }
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+
         }
     }
 

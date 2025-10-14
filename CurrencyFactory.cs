@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 namespace WinFormsApp4
 {
+    //основной класс который принимает значение из  CurrencyService и использует разные реализации из inter
     public static class CurrencyFactory
     {
         public static Task<inter> CreateCurrencyServiceAsync(string userCurrency)

@@ -28,7 +28,7 @@ namespace WinFormsApp4
         }
 
 
-
+        //отображение текущей валюты
         public async Task<bool> valutelocal()
         {
             try
@@ -224,8 +224,6 @@ namespace WinFormsApp4
             {
                 this.Text = "Транзакции - Не авторизован";
             }
-
-
         }
 
 
@@ -295,9 +293,6 @@ namespace WinFormsApp4
 
 
 
-
-
-
         //public async Task saveTranzaction()
         //{
         //    // Проверяем, что пользователь авторизован
@@ -351,10 +346,10 @@ namespace WinFormsApp4
             {
                 string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 string filePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
-                DateTimePicker picker = new DateTimePicker();
-                DateTime selected = picker.Value;
+                DateTime selected = monthCalendar1.SelectionStart;
                 string Name = comboBox1.Text;
-                string time = selected.ToString();
+                string time = selected.ToString("yyyy-MM-dd");
+                label2.Text = time;
                 Regex regex = new Regex(@"\p{L}");
                 string Summ = ((int)numericUpDown1.Value).ToString();
                 bool regexx = regex.IsMatch(Summ);
@@ -424,11 +419,15 @@ namespace WinFormsApp4
             }
         }
 
-
-        //сохранение транзакции по нажатию
+        //обработчик показать/скрыть календарь
+        int i = 0;
         private async void pictureBox1_Click(object sender, EventArgs e)
         {
-            await saveTranzaction();
+            i++;
+            if (i % 2 != 0)
+                monthCalendar1.Visible = true;
+            if (i % 2 == 0)
+                monthCalendar1.Visible = false;
         }
 
 
@@ -504,15 +503,9 @@ namespace WinFormsApp4
             }
         }
 
-        //обработчик показать/скрыть календарь
-        int i = 0;
-        private void button3_Click_1(object sender, EventArgs e)
+        private async void button3_Click_1(object sender, EventArgs e)
         {
-            i++;
-            if (i % 2 != 0)
-                monthCalendar1.Visible = true;
-            if (i % 2 == 0)
-                monthCalendar1.Visible = false;
+            await saveTranzaction();
         }
 
         //обработчик кнопки курсов валют
@@ -550,6 +543,13 @@ namespace WinFormsApp4
         {
             smenadannix form = new smenadannix();
             form.Show();
+            this.Hide();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            statistics stat = new statistics();
+            stat.Show();
             this.Hide();
         }
     }

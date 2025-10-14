@@ -5,6 +5,7 @@ using System.Windows.Forms;
 
 namespace WinFormsApp4
 {
+    //класс для отображения текущей валюты пользователя
     public class CurrencyService
     {
         private readonly string _databasePath;
