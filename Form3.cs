@@ -394,16 +394,6 @@ namespace WinFormsApp4
             }
         }
 
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             smenadannix smenn = new smenadannix();
@@ -418,10 +408,6 @@ namespace WinFormsApp4
             this.Hide();
         }
 
-        private void Form3_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 
 
@@ -431,7 +417,7 @@ namespace WinFormsApp4
         public static string CurrentLogin { get; set; } = string.Empty;
         public static string CurrentPassword { get; set; } = string.Empty;
 
-        public static void SetCurrentUser(string login, string password = "")
+        public static void SetCurrentUser(string login, string password)
         {
             CurrentLogin = login ?? string.Empty;
             CurrentPassword = password ?? string.Empty;

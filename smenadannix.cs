@@ -55,7 +55,7 @@ namespace WinFormsApp4
                 return false;
             }
         }
-        
+
 
 
         // метод смены валюты
@@ -141,7 +141,7 @@ namespace WinFormsApp4
                             using (SQLiteConnection connection = new SQLiteConnection($"Data Source={dbPath}"))
                             {
                                 await connection.OpenAsync().ConfigureAwait(false);
-                                using (var command = new SQLiteCommand($"UPDATE Usersss SET Password = @newPassword WHERE Login = @L",connection))
+                                using (var command = new SQLiteCommand($"UPDATE Usersss SET Password = @newPassword WHERE Login = @L", connection))
                                 {
                                     command.Parameters.AddWithValue("@L", Login);
                                     command.Parameters.AddWithValue("@newPassword", hashpas);
@@ -161,7 +161,7 @@ namespace WinFormsApp4
                     {
                         MessageBox.Show($"Пароли не совпадают!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
-                    }                       
+                    }
                 }
                 else
                 {
@@ -191,6 +191,18 @@ namespace WinFormsApp4
         private async void button1_Click(object sender, EventArgs e)
         {
             await smenaparolia();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form3 form3 = new Form3();
+            form3.Show();
+            this.Hide();
         }
     }
 }
