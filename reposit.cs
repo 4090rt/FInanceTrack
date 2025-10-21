@@ -11,15 +11,6 @@ namespace WinFormsApp4
     internal class reposit
     {
 
-        public class User
-        {
-            public string Login { get; set; }
-            public string Password { get; set; }
-
-            public string Valute { get; set; }
-        }
-
-
         public interface IUser
         {
             Task<bool> SaveUserAsync(string Login, string Password, string Valute);
@@ -78,6 +69,7 @@ namespace WinFormsApp4
                 {
                     if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(valute))
                     {
+                        MessageBox.Show("Заполните поля!");
                         return false;
                     }
                     string hashpass = _hashService.HashPassword(password);
@@ -95,6 +87,7 @@ namespace WinFormsApp4
                                 command.Parameters.AddWithValue("@V", valute);
 
                                 int result = await command.ExecuteNonQueryAsync();
+                                MessageBox.Show("Успех!");
                                 return result > 0;
                             }
                         }

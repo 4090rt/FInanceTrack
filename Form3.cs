@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SQLite;
-using System.Drawing;
-using System.Linq;
+﻿using System.Data.SQLite;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace WinFormsApp4
 {
     public partial class Form3 : Form
     {
+        private reposit.IUser _userRepository;
         public Form3()
         {
             InitializeComponent();
@@ -108,53 +101,53 @@ namespace WinFormsApp4
 
 
 
-        //Проверка логина на уникальность
-        public async Task<bool> Loginproverka()
-        {
-            string login = textBox1.Text;
+        ////Проверка логина на уникальность
+        //public async Task<bool> Loginproverka()
+        //{
+        //    string login = textBox1.Text;
 
-            if (string.IsNullOrEmpty(login))
-            {
-                MessageBox.Show("Введите логин!");
-                return false;
-            }
-            try
-            {
-                string dbPath = GetDatabasePath();
-                using (var das = new SQLiteConnection($"Data Source={dbPath}"))
-                {
-                    das.OpenAsync().ConfigureAwait(false);
-                    using (var commandsql = new SQLiteCommand($"SELECT COUNT(*) FROM Usersss WHERE Login = @L", das))
-                    {
-                        commandsql.Parameters.AddWithValue("@L", login);
-                        var result = await commandsql.ExecuteScalarAsync().ConfigureAwait(false);
+        //    if (string.IsNullOrEmpty(login))
+        //    {
+        //        MessageBox.Show("Введите логин!");
+        //        return false;
+        //    }
+        //    try
+        //    {
+        //        string dbPath = GetDatabasePath();
+        //        using (var das = new SQLiteConnection($"Data Source={dbPath}"))
+        //        {
+        //            das.OpenAsync().ConfigureAwait(false);
+        //            using (var commandsql = new SQLiteCommand($"SELECT COUNT(*) FROM Usersss WHERE Login = @L", das))
+        //            {
+        //                commandsql.Parameters.AddWithValue("@L", login);
+        //                var result = await commandsql.ExecuteScalarAsync().ConfigureAwait(false);
 
-                        if (result == null && result == DBNull.Value)
-                        {
-                            return false;
-                        }
-                        int count = Convert.ToInt32(result);
+        //                if (result == null && result == DBNull.Value)
+        //                {
+        //                    return false;
+        //                }
+        //                int count = Convert.ToInt32(result);
 
-                        if (count == 0)
-                        {
-                            return true;
-                        }
+        //                if (count == 0)
+        //                {
+        //                    return true;
+        //                }
 
-                        if (count <= 1)
-                        {
-                            return false;
-                        }
-                        return false;
-                    }
+        //                if (count <= 1)
+        //                {
+        //                    return false;
+        //                }
+        //                return false;
+        //            }
 
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка проверки пароля {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-        }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Ошибка проверки пароля {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        return false;
+        //    }
+        //}
 
 
         //хэширование пароля
@@ -186,59 +179,59 @@ namespace WinFormsApp4
 
 
 
-        //сохранение юзера в базу данных
-        public async Task<bool> saveUser()
-        {
-            string Login = textBox1.Text;
-            string Password = textBox2.Text;
-            string valute = comboBox2.Text;
+        ////сохранение юзера в базу данных
+        //public async Task<bool> saveUser()
+        //{
+        //    string Login = textBox1.Text;
+        //    string Password = textBox2.Text;
+        //    string valute = comboBox2.Text;
 
-            if (await Loginproverka().ConfigureAwait(false))
-            {
-                if (!string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(valute))
-                {
-                    try
-                    {
-                        string hashPassword = hashpqpass(Password);
-                        try
-                        {
-                            string dbPath = GetDatabasePath();
-                            using (var das = new SQLiteConnection($"Data Source={dbPath}"))
-                            {
-                                await das.OpenAsync().ConfigureAwait(false);
-                                var dass = new SQLiteCommand($"INSERT INTO [Usersss] (Login,Password,Valute) VALUES (@L,@P,@V)", das);
-                                dass.Parameters.AddWithValue("@L", Login);
-                                dass.Parameters.AddWithValue("@P", hashPassword);
-                                dass.Parameters.AddWithValue("@V", valute);
-                                await dass.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                MessageBox.Show("Данные сохранены");
-                                return true;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"Ошибка сохранения данных {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return false;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Ошибка при хэшировании данных: " + ex.Message);
-                        return false;
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Заполните все поля", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
-                }
-            }
-            else
-            {
-                MessageBox.Show("Такой логин уже существует! Выберите другой логин.");
-                return false;
-            }
-        }
+        //    if (await Loginproverka().ConfigureAwait(false))
+        //    {
+        //        if (!string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(valute))
+        //        {
+        //            try
+        //            {
+        //                string hashPassword = hashpqpass(Password);
+        //                try
+        //                {
+        //                    string dbPath = GetDatabasePath();
+        //                    using (var das = new SQLiteConnection($"Data Source={dbPath}"))
+        //                    {
+        //                        await das.OpenAsync().ConfigureAwait(false);
+        //                        var dass = new SQLiteCommand($"INSERT INTO [Usersss] (Login,Password,Valute) VALUES (@L,@P,@V)", das);
+        //                        dass.Parameters.AddWithValue("@L", Login);
+        //                        dass.Parameters.AddWithValue("@P", hashPassword);
+        //                        dass.Parameters.AddWithValue("@V", valute);
+        //                        await dass.ExecuteNonQueryAsync().ConfigureAwait(false);
+        //                        MessageBox.Show("Данные сохранены");
+        //                        return true;
+        //                    }
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    MessageBox.Show($"Ошибка сохранения данных {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                    return false;
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                MessageBox.Show("Ошибка при хэшировании данных: " + ex.Message);
+        //                return false;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("Заполните все поля", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return false;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Такой логин уже существует! Выберите другой логин.");
+        //        return false;
+        //    }
+        //}
 
 
 
@@ -373,7 +366,28 @@ namespace WinFormsApp4
         //регистрация(сохранения юзера)
         private async void button1_Click(object sender, EventArgs e)
         {
-            await saveUser();
+            string dbPath = GetDatabasePath();
+            var hashService = new reposit.HashService();
+            _userRepository = new reposit.Realiz(dbPath, hashService);
+            string Login = textBox1.Text;
+            string Password = textBox2.Text;
+            string Valute = comboBox2.Text;
+            try
+            {
+                bool result = await _userRepository.SaveUserAsync(Login, Password, Valute);
+                if (result)
+                {
+                    MessageBox.Show("Успешно Сохранено");
+                }
+                else
+                {
+                    MessageBox.Show("Ошибка сохранения");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникло исключение"  + ex.Message, "Ошибка" + MessageBoxIcon.Error + MessageBoxButtons.OK);
+            }
         }
 
 
