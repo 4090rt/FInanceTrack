@@ -2,6 +2,7 @@
 using System.Data;
 using System.Globalization;
 using System.Text;
+using static WinFormsApp4.fabric;
 using static WinFormsApp4.Filter;
 
 namespace WinFormsApp4
@@ -549,6 +550,23 @@ namespace WinFormsApp4
             Form2 form2 = new Form2();
             form2.Show();
             this.Hide();
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string txtFilePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
+
+
+            if (!File.Exists(txtFilePath))
+            {
+                MessageBox.Show($"Файл не найден: {txtFilePath}");
+                return;
+            }
+
+            var exporter = new ExportExcel();
+            exporter.Export1(txtFilePath);
         }
     }
 
