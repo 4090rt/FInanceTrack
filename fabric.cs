@@ -1,11 +1,15 @@
 ﻿using Aspose.Cells;
+using Aspose.Pdf;
+using Aspose.Pdf.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WinFormsApp4
 {
@@ -14,7 +18,7 @@ namespace WinFormsApp4
 
         public interface Fabricinter
         {
-            void Export(List<expense> expenses, string filePath); 
+            void Export(List<expense> expenses, string filePath);
             void Export1(string txtFilePath);
         }
 
@@ -38,7 +42,7 @@ namespace WinFormsApp4
                         string[] allLines = await File.ReadAllLinesAsync(txtFilePath).ConfigureAwait(false);
                         var lines = allLines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
 
-                        MessageBox.Show($"Найдено непустых строк: {lines.Length}");
+                        //MessageBox.Show($"Найдено непустых строк: {lines.Length}");
 
                         for (int i = 0; i < lines.Length; i += 3)
                         {
@@ -65,7 +69,7 @@ namespace WinFormsApp4
                             }
                         }
 
-                        MessageBox.Show($"Прочитано записей: {expenses.Count}");
+                        //MessageBox.Show($"Прочитано записей: {expenses.Count}");
                     }
                     catch (Exception ex)
                     {
@@ -86,7 +90,7 @@ namespace WinFormsApp4
             {
                 try
                 {
-                    MessageBox.Show("Начало экспорта в Excel");
+                    //MessageBox.Show("Начало экспорта в Excel");
 
                     List<expense> expenses = await ReadExpensesFromTxt(txtFilePath);
 
@@ -126,8 +130,8 @@ namespace WinFormsApp4
                     worksheet.Cells["C1"].SetStyle(headerStyle);
 
                     worksheet.AutoFitColumns();
-                    workbook.Save(outputPath, SaveFormat.Xlsx);
-                    
+                    workbook.Save(outputPath, Aspose.Cells.SaveFormat.Xlsx);
+
 
                     MessageBox.Show($"Файл сохранен: {outputPath}");
                 }
@@ -137,10 +141,10 @@ namespace WinFormsApp4
                 }
             }
 
-            // 3. Главный метод экспорта
+            // 3. Главный метод экспорта сохранение
             public void Export1(string txtFilePath)
             {
-                MessageBox.Show($"Export1 вызван с: {txtFilePath}");
+                //MessageBox.Show($"Export1 вызван с: {txtFilePath}");
 
                 using (SaveFileDialog saveDialog = new SaveFileDialog())
                 {
@@ -153,6 +157,7 @@ namespace WinFormsApp4
                     }
                     else
                     {
+                        MessageBox.Show($"Export1 вызван с: {txtFilePath}");
                         MessageBox.Show("Отменено пользователем");
                     }
                 }
@@ -164,33 +169,151 @@ namespace WinFormsApp4
             }
         }
 
-        //public class ExportPdf : Fabricinter
-        //{
-        //    public void Export(List<expense> expenses, string filePath)
-        //    {
-
-        //    }
-        //}
-
-        //public class ExportWord : Fabricinter
-        //{
-        //    public void Export(List<expense> expenses, string filePath)
-        //    {
-
-        //    }
-        //}
-
-        public class Exports
+        public class ExportPdf : Fabricinter
         {
-            public Fabricinter Favricexports(Exportformat exportformat)
+            // экспорт в PDF
+            public async Task ExportToPDF(string outputPath, string txtFilePath)
             {
-                return exportformat switch
+                try
                 {
-                    Exportformat.Excel => new ExportExcel(),
-                    //Exportformat.Word => new ExportWord(),
-                    //Exportformat.PDF => new ExportPdf()
-                };
+                    List<expense> expenses = await ReadExpensesFromTxt(txtFilePath);
+                    //создание нового документа и страницы
+                    Document doc = new Document();
+                    Aspose.Pdf.Page page = doc.Pages.Add();
+                    // настройка страницы
+                    TextFragment text = new TextFragment("Расходы");
+                    text.TextState.Font = FontRepository.FindFont("Arial");
+                    text.TextState.FontSize = 14;
+                    page.Paragraphs.Add(text);
+                    //создание таблицы
+                    Table table = new Table();
+                    table.Border = new BorderInfo(BorderSide.All, 1f);
+                    Aspose.Pdf.Row row = table.Rows.Add();
+                    row.Cells.Add("Категория");
+                    row.Cells.Add("Сумма");
+                    row.Cells.Add("Дата");
+
+                    try
+                    {
+                        foreach (var exp in expenses)
+                        {
+                            Aspose.Pdf.Row datarow = table.Rows.Add();
+                            datarow.Cells.Add(exp.category);
+                            datarow.Cells.Add(exp.count.ToString("F2"));
+                            datarow.Cells.Add(exp.date.ToString("dd.MM.yyyy"));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Не удалось создать таблицу для экспорта" + ex.Message);
+                    }
+                    //добавление таблицы на страницу
+                    page.Paragraphs.Add(table);
+
+                    //сохранение файла
+                    doc.Save(outputPath, Aspose.Pdf.SaveFormat.Pdf);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Не удалось экспортировать в PDF" + ex.Message);                
+                }
+            }
+
+            // чтение из файла в лист
+            public async Task<List<expense>> ReadExpensesFromTxt(string txtFilePath)
+            {
+                var expenses = new List<expense>();
+                if (File.Exists(txtFilePath))
+                {
+                    try
+                    {
+                        string[] allines = await File.ReadAllLinesAsync(txtFilePath).ConfigureAwait(false);
+                        var lines = allines.Where(lines => !string.IsNullOrWhiteSpace(lines)).ToArray();
+                        for (int i = 0; i < lines.Length; i += 3)
+                        {
+                            if (i + 2 >= lines.Length)
+                                break;
+                            string category = lines[i].Trim();
+                            string count = lines[i + 1].Trim();
+                            string date = lines[i + 2].Trim();
+                            try
+                            {
+                                var Listadd = new expense
+                                {
+                                    category = category,
+                                    count = decimal.Parse(count),
+                                    date = DateTime.Parse(date)
+                                };
+                                expenses.Add(Listadd);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Ошибка в записи {i / 3 + 1}: {ex.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось найти файл для экспорта");
+                }
+                return expenses;
+            }
+
+            //3. Главный метод экспорта сохранение
+            public void Export1(string txtFilePath)
+            {
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.Filter = "PDF Files|*.PDF";
+                    saveFileDialog.Title = "Сохранить PDF файл";
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    { 
+                        string outputPath = saveFileDialog.FileName;
+                        ExportToPDF(outputPath, txtFilePath);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Export1 вызван с: {txtFilePath}");
+                        MessageBox.Show("Отменено пользователем");
+                    }
+                }
+
+
+            }
+
+            // Не используется
+            public void Export(List<expense> expenses, string filePath)
+            {
             }
         }
+
+
+
+            //public class ExportWord : Fabricinter
+            //{
+            //    public void Export(List<expense> expenses, string filePath)
+            //    {
+
+            //    }
+            //}
+
+            public class Exports
+            {
+                public Fabricinter Fabricexports(Exportformat exportformat)
+                {
+                    return exportformat switch
+                    {
+                        Exportformat.Excel => new ExportExcel(),
+                        //Exportformat.Word => new ExportWord(),
+                        Exportformat.PDF => new ExportPdf()
+                    };
+                }
+            }      
     }
 }
