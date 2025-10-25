@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Data.SQLite;
-using System.Drawing;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+﻿using System.Data.SQLite;
 
 namespace WinFormsApp4
 {
@@ -40,6 +28,20 @@ namespace WinFormsApp4
             {
                 Form3 form = new Form3();
                 string dbPath = form.GetDatabasePath();
+
+
+                if (string.IsNullOrEmpty(dbPath))
+                {
+                    MessageBox.Show("ОШИБКА: Путь к БД равен null или пустой строке!");
+                    return false;
+                }
+
+
+                string directory = Path.GetDirectoryName(dbPath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
 
                 var currencyService = new CurrencyService(dbPath);
                 string userCurrency = await currencyService.GetUserCurrencyAsync(GlobalData.CurrentLogin);

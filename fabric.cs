@@ -1,6 +1,7 @@
 ﻿using Aspose.Cells;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,197 +25,70 @@ namespace WinFormsApp4
             Word
         }
 
-        // 2 экпортируем из листа в Excel создавая новую книгу, столбики и записываем туда данные из лист,настраиваем стиль, авторазмер и сохраняем
-        //public class ExportExcel:Fabricinter
-        //{
-        //    public void ExportToExcel(string outputPath)
-        //    {
-        //        List<expense> expenses = ReadExpensesFromTxt();
-        //        MessageBox.Show($"Прочитано записей из TXT: {expenses.Count}");
-        //        Workbook exporTbook = new Workbook();
-        //        Worksheet worksheet = exporTbook.Worksheets[0];
-        //        worksheet.Name = "Расходы";
-
-        //        worksheet.Cells["A1"].PutValue("Категория");
-        //        worksheet.Cells["B1"].PutValue("Сумма");
-        //        worksheet.Cells["C1"].PutValue("Дата");
-
-        //        int row = 2;
-        //        int addedCount = 0;
-        //        foreach (var expensee in expenses)
-        //        {
-        //            worksheet.Cells[$"A{row}"].PutValue(expensee.category);
-        //            worksheet.Cells[$"B{row}"].PutValue(expensee.count);
-        //            worksheet.Cells[$"C{row}"].PutValue(expensee.date);
-        //            row++;
-        //            addedCount++;
-        //        }
-        //        MessageBox.Show($"Добавлено строк в Excel: {addedCount}"); // ← ДОБАВЬ ЭТО
-        //        Style workshet = exporTbook.CreateStyle();
-        //        workshet.Font.IsBold = true;
-        //        workshet.ForegroundColor = System.Drawing.Color.LightBlue;
-        //        workshet.Pattern = BackgroundType.Solid;
-
-
-        //        for (int stl = 0; stl < 4; stl++)
-        //        {
-        //            worksheet.Cells[0, 4].SetStyle(workshet);
-        //        }
-
-        //        worksheet.AutoFitColumns();
-        //        MessageBox.Show($"Сохраняем файл по пути: {outputPath}"); // ← ДОБАВЬ ЭТО
-        //        exporTbook.Save(outputPath, SaveFormat.Xlsx);
-        //        MessageBox.Show("Сохранение завершено!"); // ← ДОБАВЬ ЭТО
-        //    }
-
-        //    // 1 сначала читаем txt из в маасив и записываем в лист
-        //    private List<expense> ReadExpensesFromTxt()
-        //    {
-        //        var expenses = new List<expense>();
-        //        string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        //        string correctFilePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
-        //        MessageBox.Show($"Пытаемся прочитать файл: {correctFilePath}"); // ← ДОБАВЬ
-        //        MessageBox.Show($"Файл существует: {File.Exists(correctFilePath)}"); // ← ДОБАВЬ
-        //        try
-        //        {
-        //            string[] lines = File.ReadAllLines(correctFilePath);
-        //            MessageBox.Show($"Найдено строк в файле: {lines.Length}"); // ← ДОБАВЬ
-        //            foreach (string line in lines)
-        //            {
-
-        //                if (string.IsNullOrWhiteSpace(line))
-        //                    continue;
-        //                MessageBox.Show($"Обрабатываем строку: {line}");
-        //                string[] parts = line.Split('|');
-        //                MessageBox.Show($"Разделено на частей: {parts.Length}"); // ← ДОБАВЬ
-        //                if (parts.Length >= 3)
-        //                {
-        //                    var expenseItem = new expense
-        //                    {
-        //                        category = parts[0].Trim(),
-        //                        count = decimal.Parse(parts[1].Trim()),
-        //                        date = DateTime.Parse(parts[2].Trim())
-        //                    };
-        //                    expenses.Add(expenseItem);
-        //                    MessageBox.Show($"Добавлена запись: {expenseItem.category}"); // ← ДОБАВЬ
-
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            MessageBox.Show(ex.Message);
-        //        }
-        //        return expenses;
-
-        //    }
-
-        //    //просто для сохранения реализации из интерфейса
-        //    public void Export(List<expense> expenses, string txtFilePath)
-        //    {
-
-        //    }
-
-
-        //    // 3 даем пользователю выбрать место сохранения и сохраняем туда excel
-        //    public  void Export1()
-        //    {
-        //        string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        //        string txtFilePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
-        //        if (string.IsNullOrEmpty(txtFilePath) || !File.Exists(txtFilePath))
-        //        {
-        //            MessageBox.Show($"Файл не найден или путь пустой: {txtFilePath}");
-        //            return;
-        //        }
-        //        MessageBox.Show($"Начинаем экспорт из: {txtFilePath}");
-        //        MessageBox.Show(GlobalData.CurrentLogin);
-        //        using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-        //        {
-        //            saveFileDialog.Filter = "Excel Files|*.xlsx";
-        //            saveFileDialog.Title = "Сохранить Excel файл";
-        //            saveFileDialog.DefaultExt = "xlsx";
-
-        //            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-        //            {
-        //                var outputPath = saveFileDialog.FileName;
-        //                try
-        //                {
-
-        //                    ExportToExcel(outputPath);
-        //                    MessageBox.Show($"Файл успешно экспортирован в Excel. Файл расположен: {outputPath}");
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    MessageBox.Show("Ошибка экспорта: " + ex.Message);
-        //                    if (ex.InnerException != null)
-        //                    {
-        //                        MessageBox.Show($"Внутренняя ошибка: {ex.InnerException.Message}");
-        //                    }
-        //                }
-        //            }
-
-        //            else
-        //            {
-        //                MessageBox.Show("EROR!");
-        //            }
-        //        }
-        //    }
-        //}
         public class ExportExcel : Fabricinter
         {
             // 1. Чтение из TXT
-            private List<expense> ReadExpensesFromTxt(string txtFilePath)
+            private async Task<List<expense>> ReadExpensesFromTxt(string txtFilePath)
             {
                 var expenses = new List<expense>();
-
-                MessageBox.Show($"Чтение файла: {txtFilePath}");
-
-                if (!File.Exists(txtFilePath))
+                if (File.Exists(txtFilePath))
                 {
-                    MessageBox.Show("Файл не существует!");
-                    return expenses;
-                }
-
-                try
-                {
-                    string[] lines = File.ReadAllLines(txtFilePath);
-                    MessageBox.Show($"Найдено строк: {lines.Length}");
-
-                    foreach (string line in lines)
+                    try
                     {
-                        if (string.IsNullOrWhiteSpace(line))
-                            continue;
+                        string[] allLines = await File.ReadAllLinesAsync(txtFilePath).ConfigureAwait(false);
+                        var lines = allLines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
 
-                        string[] parts = line.Split('|');
-                        if (parts.Length >= 3)
+                        MessageBox.Show($"Найдено непустых строк: {lines.Length}");
+
+                        for (int i = 0; i < lines.Length; i += 3)
                         {
-                            expenses.Add(new expense
-                            {
-                                category = parts[0].Trim(),
-                                count = decimal.Parse(parts[1].Trim()),
-                                date = DateTime.Parse(parts[2].Trim())
-                            });
-                        }
-                    }
+                            if (i + 2 >= lines.Length)
+                                break;
 
-                    MessageBox.Show($"Успешно прочитано: {expenses.Count} записей");
+                            string category = lines[i].Trim();
+                            string countStr = lines[i + 1].Trim();
+                            string dateStr = lines[i + 2].Trim();
+
+                            try
+                            {
+                                var expenseItem = new expense
+                                {
+                                    category = category,
+                                    count = decimal.Parse(countStr),
+                                    date = DateTime.Parse(dateStr)
+                                };
+                                expenses.Add(expenseItem);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Ошибка в записи {i / 3 + 1}: {ex.Message}");
+                            }
+                        }
+
+                        MessageBox.Show($"Прочитано записей: {expenses.Count}");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show($"Ошибка чтения: {ex.Message}");
+                    MessageBox.Show("Файл для экспорта не найден");
+                    return null;
                 }
 
                 return expenses;
             }
 
             // 2. Экспорт в Excel
-            public void ExportToExcel(string txtFilePath, string outputPath)
+            public async Task ExportToExcel(string txtFilePath, string outputPath)
             {
                 try
                 {
                     MessageBox.Show("Начало экспорта в Excel");
 
-                    List<expense> expenses = ReadExpensesFromTxt(txtFilePath);
+                    List<expense> expenses = await ReadExpensesFromTxt(txtFilePath);
 
                     if (expenses.Count == 0)
                     {
@@ -237,7 +111,7 @@ namespace WinFormsApp4
                     {
                         worksheet.Cells[$"A{row}"].PutValue(expense.category);
                         worksheet.Cells[$"B{row}"].PutValue(expense.count);
-                        worksheet.Cells[$"C{row}"].PutValue(expense.date);
+                        worksheet.Cells[$"C{row}"].PutValue(expense.date.ToString("dd.MM.yyyy"));
                         row++;
                     }
 
@@ -253,6 +127,7 @@ namespace WinFormsApp4
 
                     worksheet.AutoFitColumns();
                     workbook.Save(outputPath, SaveFormat.Xlsx);
+                    
 
                     MessageBox.Show($"Файл сохранен: {outputPath}");
                 }
