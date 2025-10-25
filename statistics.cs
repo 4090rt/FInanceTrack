@@ -20,6 +20,7 @@ namespace WinFormsApp4
             comboBox2.SelectedIndexChanged += async (s, e) => { await filtretranzaction(); };
             filtretranzaction();
             filtretranzaction2();
+            massivcombfabric();
         }
 
 
@@ -194,7 +195,7 @@ namespace WinFormsApp4
         public async Task filtretranzaction()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string filePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
+            string filePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.tt");
 
             if (!File.Exists(filePath))
             {
@@ -264,252 +265,11 @@ namespace WinFormsApp4
 
 
 
-
-
-
-
-
-            //if (selectedFilter == "День")
-            //{
-            //    if (selectedfilter2 == "По возрастанию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date == now.Date)
-            //            .OrderBy(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-            //    else if (selectedfilter2 == "По убыванию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date == now.Date)
-            //            .OrderByDescending(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-
-            //}
-
-
-
-
-
-
-            //else if (selectedFilter == "Неделя")
-            //{
-            //    DateTime periodStart = now.Date.AddDays(-6);
-
-            //    if (selectedfilter2 == "По возрастанию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date >= periodStart && e.date.Date <= now.Date)
-            //            .OrderBy(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-            //    else if (selectedfilter2 == "По убыванию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date >= periodStart && e.date.Date <= now.Date)
-            //            .OrderByDescending(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;  
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-
-            //}
-
-
-
-            //else if (selectedFilter == "Месяц")
-            //{
-            //    DateTime periodStart = new DateTime(now.Year, now.Month, 1);
-
-            //    if (selectedfilter2 == "По возрастанию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date >= periodStart && e.date.Date <= now.Date)
-            //            .OrderBy(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-            //    else if (selectedfilter2 == "По убыванию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date >= periodStart && e.date.Date <= now.Date)
-            //            .OrderByDescending(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-            //}
-
-
-
-
-            //else if (selectedFilter == "Год")
-            //{
-            //    DateTime periodStart = new DateTime(now.Year, 1, 1);
-
-            //    if (selectedfilter2 == "По возрастанию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date >= periodStart && e.date.Date <= now.Date)
-            //            .OrderBy(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-            //    else if (selectedfilter2 == "По убыванию затрат")
-            //    {
-            //        filtered = expenses
-            //            .Where(e => e.date.Date >= periodStart && e.date.Date <= now.Date)
-            //            .OrderByDescending(r => r.count)
-            //            .ToList();
-            //        foreach (var exp in filtered)
-            //        {
-            //            var item = new ListViewItem(exp.category);
-            //            item.SubItems.Add(exp.count.ToString("0.##"));
-            //            item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
-            //            listView1.Items.Add(item);
-            //        }
-            //        formsPlot1.Visible = true;
-            //        formsPlot1.Plot.Clear();
-            //        double[] values = filtered.Select(e => (double)e.count).ToArray();
-            //        string[] labels = filtered.Select(e => e.category).ToArray();
-            //        double[] positions = Enumerable.Range(0, values.Length).Select(i => (double)i).ToArray();
-            //        var bars = formsPlot1.Plot.Add.Bars(values);
-            //        formsPlot1.Plot.Axes.Margins(bottom: 0);
-            //        formsPlot1.Plot.Title("Расходы по категориям");
-            //        formsPlot1.Plot.YLabel("Сумма");
-            //        formsPlot1.Plot.XLabel("Категории");
-            //        formsPlot1.Refresh();
-            //    }
-            //}
             var filteredd = FilterStrategyFactory.CreateFilterStrategy(selectedFilter, selectedfilter2);
             var filtereddd = filteredd.Filter(expenses, now);
             filteredd.DisplayResults(filtereddd, listView1, formsPlot1);
 
-
-
-
-
+            
 
             if (!filtered.Any())
             {
@@ -532,6 +292,7 @@ namespace WinFormsApp4
             listView1.View = View.Details;
             listView1.FullRowSelect = true;
             listView1.GridLines = true;
+            
             if (listView1.Columns.Count == 0)
             {
                 listView1.Columns.Add("Категория", 150);
@@ -552,21 +313,34 @@ namespace WinFormsApp4
             this.Hide();
         }
 
+        public void massivcombfabric()
+        {
+            string[] massiv = ["Экспорт Excel", "Экспорт PDF"];
+            comboBox3.Items.AddRange(massiv);
+        }
+
         private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string txtFilePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
-
-
-            if (!File.Exists(txtFilePath))
+            //MessageBox.Show($"Пытаемся открыть: {txtFilePath}");
+            if (comboBox3.Text == "Экспорт PDF")
             {
-                MessageBox.Show($"Файл не найден: {txtFilePath}");
-                return;
+                var exportformat = Exportformat.PDF;
+                var factory = new Exports();
+                var exporter = factory.Fabricexports(exportformat);
+                exporter.Export1(txtFilePath);
             }
 
-            var exporter = new ExportExcel();
-            exporter.Export1(txtFilePath);
+            if (comboBox3.Text == "Экспорт Excel")
+            {
+                var exportformat = Exportformat.Excel;
+                var factory = new Exports();
+                var exporter = factory.Fabricexports(exportformat);
+                exporter.Export1(txtFilePath);
+            }
+            //var exporter = new ExportExcel();
+            //exporter.Export1(txtFilePath);
         }
     }
 
