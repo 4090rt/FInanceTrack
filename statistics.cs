@@ -269,7 +269,7 @@ namespace WinFormsApp4
             var filtereddd = filteredd.Filter(expenses, now);
             filteredd.DisplayResults(filtereddd, listView1, formsPlot1);
 
-            
+
 
             if (!filtered.Any())
             {
@@ -292,7 +292,7 @@ namespace WinFormsApp4
             listView1.View = View.Details;
             listView1.FullRowSelect = true;
             listView1.GridLines = true;
-            
+
             if (listView1.Columns.Count == 0)
             {
                 listView1.Columns.Add("Категория", 150);
@@ -315,21 +315,29 @@ namespace WinFormsApp4
 
         public void massivcombfabric()
         {
-            string[] massiv = ["Экспорт Excel", "Экспорт PDF","Экспорт Word"];
+            string[] massiv = ["Экспорт Excel", "Экспорт PDF", "Экспорт Word"];
             comboBox3.Items.AddRange(massiv);
         }
 
-        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+
+
+        private void label6_Click(object sender, EventArgs e)
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string txtFilePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
             //MessageBox.Show($"Пытаемся открыть: {txtFilePath}");
+            if (string.IsNullOrEmpty(comboBox3.Text))
+            {
+                MessageBox.Show("Выберите формат для экспорта");
+                return;
+            }
+
             if (comboBox3.Text == "Экспорт PDF")
             {
                 var exportformat = Exportformat.PDF;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.Export1(txtFilePath);
+                exporter.ExportExcelcustompath(txtFilePath);
             }
 
             if (comboBox3.Text == "Экспорт Excel")
@@ -337,15 +345,15 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.Excel;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.Export1(txtFilePath);
+                exporter.ExportExcelcustompath(txtFilePath);
             }
 
             if (comboBox3.Text == "Экспорт Word")
-            { 
+            {
                 var exportformat = Exportformat.Word;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.Export1(txtFilePath);
+                exporter.ExportExcelcustompath(txtFilePath);
             }
         }
     }

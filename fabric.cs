@@ -19,8 +19,7 @@ namespace WinFormsApp4
 
         public interface Fabricinter
         {
-            void Export(List<expense> expenses, string filePath);
-            void Export1(string txtFilePath);
+            void ExportExcelcustompath(string txtFilePath);
         }
 
         public enum Exportformat
@@ -143,10 +142,8 @@ namespace WinFormsApp4
             }
 
             // 3. Главный метод экспорта сохранение
-            public void Export1(string txtFilePath)
+            public void ExportExcelcustompath(string txtFilePath)
             {
-                //MessageBox.Show($"Export1 вызван с: {txtFilePath}");
-
                 using (SaveFileDialog saveDialog = new SaveFileDialog())
                 {
                     saveDialog.Filter = "Excel Files|*.xlsx";
@@ -162,11 +159,6 @@ namespace WinFormsApp4
                         MessageBox.Show("Отменено пользователем");
                     }
                 }
-            }
-
-            // Не используется
-            public void Export(List<expense> expenses, string filePath)
-            {
             }
         }
 
@@ -213,6 +205,8 @@ namespace WinFormsApp4
 
                     //сохранение файла
                     doc.Save(outputPath, Aspose.Pdf.SaveFormat.Pdf);
+
+                    MessageBox.Show($"Файл сохранен: {outputPath}");
                 }
                 catch (Exception ex)
                 {
@@ -266,7 +260,7 @@ namespace WinFormsApp4
             }
 
             //3. Главный метод экспорта сохранение
-            public void Export1(string txtFilePath)
+            public void ExportExcelcustompath(string txtFilePath)
             {
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
@@ -284,13 +278,6 @@ namespace WinFormsApp4
                         MessageBox.Show("Отменено пользователем");
                     }
                 }
-
-
-            }
-
-            // Не используется
-            public void Export(List<expense> expenses, string filePath)
-            {
             }
         }
 
@@ -336,12 +323,10 @@ namespace WinFormsApp4
                 }
                 builder.EndTable();
                 document.Save(outputPath);
+
+                MessageBox.Show($"Файл сохранен: {outputPath}");
             }
 
-            // не используется
-            public void Export(List<expense> expenses, string filePath)
-            {
-            }
             // чтение из файла в лист
             public async Task<List<expense>> ReadExpensesFromTxt(string txtFilePath)
             {
@@ -390,20 +375,28 @@ namespace WinFormsApp4
             }
 
             //3. Главный метод экспорта сохранение
-            public void Export1(string txtFilePath)
+            public void ExportExcelcustompath(string txtFilePath)
             {
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
                     saveFileDialog.Filter = "Word Documents|*.docx";
                     saveFileDialog.Title = "Сохранить Word файл";
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    try
                     {
-                        string outputPath = saveFileDialog.FileName;
-                        ExportToWord(outputPath, txtFilePath);
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            string outputPath = saveFileDialog.FileName;
+                            ExportToWord(outputPath, txtFilePath);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Export1 вызван с: {txtFilePath}");
+                            MessageBox.Show("Отменено пользователем");
+                        }
                     }
-                    else
-                    {
-                        MessageBox.Show("Отменено пользователем");
+                    catch(Exception ex)
+                    { 
+                        MessageBox.Show(ex.Message + "Возникло в  ExportWord => ExportExcelcustompath ");
                     }
                 }
             }
@@ -412,12 +405,13 @@ namespace WinFormsApp4
         {
           public Fabricinter Fabricexports(Exportformat exportformat)
           {
-            return exportformat switch
-            {
-              Exportformat.Excel => new ExportExcel(),
-              Exportformat.Word => new ExportWord(),
-              Exportformat.PDF => new ExportPdf()
-            };
+                return exportformat switch
+                {
+                    Exportformat.Excel => new ExportExcel(),
+                    Exportformat.Word => new ExportWord(),
+                    Exportformat.PDF => new ExportPdf(),
+                    _ => throw new ArgumentException($"Неизвестный формат {exportformat}")
+                };
           }
         }
         
