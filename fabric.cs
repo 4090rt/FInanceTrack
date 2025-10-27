@@ -1,6 +1,7 @@
 ﻿using Aspose.Cells;
 using Aspose.Pdf;
 using Aspose.Pdf.Text;
+using Aspose.Words;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
@@ -120,7 +121,7 @@ namespace WinFormsApp4
                     }
 
                     // Стиль заголовков
-                    Style headerStyle = workbook.CreateStyle();
+                    Aspose.Cells.Style headerStyle = workbook.CreateStyle();
                     headerStyle.Font.IsBold = true;
                     headerStyle.ForegroundColor = System.Drawing.Color.LightBlue;
                     headerStyle.Pattern = BackgroundType.Solid;
@@ -178,7 +179,7 @@ namespace WinFormsApp4
                 {
                     List<expense> expenses = await ReadExpensesFromTxt(txtFilePath);
                     //создание нового документа и страницы
-                    Document doc = new Document();
+                    Aspose.Pdf.Document doc = new Aspose.Pdf.Document();
                     Aspose.Pdf.Page page = doc.Pages.Add();
                     // настройка страницы
                     TextFragment text = new TextFragment("Расходы");
@@ -215,7 +216,7 @@ namespace WinFormsApp4
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Не удалось экспортировать в PDF" + ex.Message);                
+                    MessageBox.Show("Не удалось экспортировать в PDF" + ex.Message);
                 }
             }
 
@@ -273,7 +274,7 @@ namespace WinFormsApp4
                     saveFileDialog.Title = "Сохранить PDF файл";
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                    { 
+                    {
                         string outputPath = saveFileDialog.FileName;
                         ExportToPDF(outputPath, txtFilePath);
                     }
@@ -295,25 +296,130 @@ namespace WinFormsApp4
 
 
 
-            //public class ExportWord : Fabricinter
-            //{
-            //    public void Export(List<expense> expenses, string filePath)
-            //    {
-
-            //    }
-            //}
-
-            public class Exports
+        public class ExportWord : Fabricinter
+        {
+            // экспорт в Word
+            public async Task ExportToWord(string outputPath, string txtFilePath)
             {
-                public Fabricinter Fabricexports(Exportformat exportformat)
+                List<expense> expenses = await ReadExpensesFromTxt(txtFilePath);
+
+                Aspose.Words.Document document = new Aspose.Words.Document();
+                DocumentBuilder builder = new DocumentBuilder(document);
+
+                builder.Font.Size = 16;
+                builder.Font.Bold = true;
+                builder.Writeln("Отчет о расходах");
+                builder.Writeln();
+
+                // Таблица
+                builder.Font.Size = 12;
+                builder.Font.Bold = false;
+
+                Aspose.Words.Tables.Table table = builder.StartTable();
+                builder.InsertCell();
+                builder.Write("Категория");
+                builder.InsertCell();
+                builder.Write("Cумма");
+                builder.InsertCell();
+                builder.Write("Дата");
+                builder.EndRow();
+
+                foreach (var expense in expenses)
                 {
-                    return exportformat switch
-                    {
-                        Exportformat.Excel => new ExportExcel(),
-                        //Exportformat.Word => new ExportWord(),
-                        Exportformat.PDF => new ExportPdf()
-                    };
+                    builder.InsertCell();
+                    builder.Write(expense.category);
+                    builder.InsertCell();
+                    builder.Write(expense.count.ToString("F2"));
+                    builder.InsertCell();
+                    builder.Write(expense.date.ToString("dd.MM.yyyy"));
+                    builder.EndRow();
                 }
-            }      
+                builder.EndTable();
+                document.Save(outputPath);
+            }
+
+            // не используется
+            public void Export(List<expense> expenses, string filePath)
+            {
+            }
+            // чтение из файла в лист
+            public async Task<List<expense>> ReadExpensesFromTxt(string txtFilePath)
+            {
+                var expenses = new List<expense>();
+                if (File.Exists(txtFilePath))
+                {
+                    try
+                    {
+                        string[] alllines = await File.ReadAllLinesAsync(txtFilePath).ConfigureAwait(false);
+                        var lines = alllines.Where(lines => !string.IsNullOrEmpty(lines)).ToArray();
+                        for (int i = 0; i < lines.Length; i += 3)
+                        {
+                            if (i + 2 >= lines.Length)
+                                break;
+
+                            string category = lines[i].Trim();
+                            string count = lines[i + 1].Trim();
+                            string date = lines[i + 2].Trim();
+
+                            try
+                            {
+                                var ListAdd = new expense
+                                {
+                                    category = category,
+                                    count = Decimal.Parse(count),
+                                    date = DateTime.Parse(date)
+                                };
+                                expenses.Add(ListAdd);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Ошибка в записи {i / 3 + 1}: {ex.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось найти файл для экспорта");
+                }
+                return expenses;
+            }
+
+            //3. Главный метод экспорта сохранение
+            public void Export1(string txtFilePath)
+            {
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.Filter = "Word Documents|*.docx";
+                    saveFileDialog.Title = "Сохранить Word файл";
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string outputPath = saveFileDialog.FileName;
+                        ExportToWord(outputPath, txtFilePath);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Отменено пользователем");
+                    }
+                }
+            }
+        }
+        public class Exports
+        {
+          public Fabricinter Fabricexports(Exportformat exportformat)
+          {
+            return exportformat switch
+            {
+              Exportformat.Excel => new ExportExcel(),
+              Exportformat.Word => new ExportWord(),
+              Exportformat.PDF => new ExportPdf()
+            };
+          }
+        }
+        
     }
 }
