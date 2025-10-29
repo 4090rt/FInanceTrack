@@ -153,28 +153,28 @@ namespace WinFormsApp4
         //хэширование пароля
         public string hashpqpass(string Password)
         {
-            try
-            {
-                if (!string.IsNullOrEmpty(Password))
+                try
                 {
-                    using (SHA256 sHA256 = SHA256.Create())
+                    if (!string.IsNullOrEmpty(Password))
                     {
-                        byte[] bytes = sHA256.ComputeHash(Encoding.UTF8.GetBytes(Password));
-                        StringBuilder buider = new StringBuilder();
-                        for (int i = 0; i < bytes.Length; i++)
+                        using (SHA256 sHA256 = SHA256.Create())
                         {
-                            buider.Append(bytes[i].ToString("x2"));
+                            byte[] bytes = sHA256.ComputeHash(Encoding.UTF8.GetBytes(Password));
+                            StringBuilder buider = new StringBuilder();
+                            for (int i = 0; i < bytes.Length; i++)
+                            {
+                                buider.Append(bytes[i].ToString("x2"));
+                            }
+                            return buider.ToString();
                         }
-                        return buider.ToString();
                     }
+                    throw new Exception("Ошибка");
                 }
-                throw new Exception("Ошибка");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка" + ex.Message);
-                throw;
-            }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка" + ex.Message);
+                    throw;
+                }
         }
 
 

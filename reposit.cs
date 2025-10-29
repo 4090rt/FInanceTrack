@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WinFormsApp4
 {
-    internal class reposit
+    public class reposit
     {
 
         public interface IUser
@@ -78,7 +78,7 @@ namespace WinFormsApp4
                     {
                         using var connect = new SQLiteConnection($"Data Source={_dbPath}");
                         {
-                            await connect.OpenAsync();
+                            await connect.OpenAsync().ConfigureAwait(false);
 
                             using var command = new SQLiteCommand("INSERT INTO [Usersss] (Login, Password, Valute) VALUES (@L, @HP, @V)", connect);
                             {
@@ -109,17 +109,20 @@ namespace WinFormsApp4
             {
                 try
                 {
-                    using var connect = new SQLiteConnection($"Data Source={_dbPath}");
-                    await connect.OpenAsync().ConfigureAwait(false);
+                    using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
+                    {
+                        await connect.OpenAsync().ConfigureAwait(false);
 
-                    using var command = new SQLiteCommand(
-                        "SELECT COUNT(1) FROM [Usersss] WHERE Login = @L",
-                        connect);
+                        using var command = new SQLiteCommand(
+                            "SELECT COUNT(1) FROM [Usersss] WHERE Login = @L",
+                            connect);
 
-                    command.Parameters.AddWithValue("@L", login);
-                    var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
-                    return Convert.ToInt32(result) > 0;
-                }
+                        command.Parameters.AddWithValue("@L", login);
+                        var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                        return Convert.ToInt32(result) > 0;
+                    }
+
+                    }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Ошибка проверки логина: {ex.Message}");

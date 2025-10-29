@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Windows.Forms;
 
 namespace WinFormsApp4
 {
     public class inter
     {
         private readonly Gred _greeder;
-        
+
         public inter(Gred greeter)
         {
             _greeder = greeter ?? throw new ArgumentNullException(nameof(greeter));
@@ -24,7 +18,7 @@ namespace WinFormsApp4
             {
                 return string.Empty;
             }
-            
+
             return await _greeder.valutezapros(valute).ConfigureAwait(false);
         }
     }
@@ -59,9 +53,9 @@ namespace WinFormsApp4
                         foreach (string basecyrens in baseCurrencies)
                         {
                             string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
-                            HttpResponseMessage recpon = await client.GetAsync(URL);
+                            HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
                             recpon.EnsureSuccessStatusCode();
-                            string jsconcl = await recpon.Content.ReadAsStringAsync();
+                            string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                             using (JsonDocument json = JsonDocument.Parse(jsconcl))
                             {
@@ -78,6 +72,7 @@ namespace WinFormsApp4
                                             builder.AppendLine($"1 {basecyrens} = {rate} {currentt}");
                                         }
                                         builder.AppendLine();
+                                        return builder.ToString();
                                     }
                                 }
                                 else
@@ -107,7 +102,7 @@ namespace WinFormsApp4
             }
             return "";
         }
-        
+
     }
 
 
@@ -130,9 +125,9 @@ namespace WinFormsApp4
                         foreach (string basecyrens in baseCurrencies)
                         {
                             string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
-                            HttpResponseMessage recpon = await client.GetAsync(URL);
+                            HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
                             recpon.EnsureSuccessStatusCode();
-                            string jsconcl = await recpon.Content.ReadAsStringAsync();
+                            string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                             using (JsonDocument json = JsonDocument.Parse(jsconcl))
                             {
@@ -178,7 +173,7 @@ namespace WinFormsApp4
 
     }
 
-    
+
     // реализация для евро
     public class Eurvalute : Gred
     {
@@ -198,9 +193,9 @@ namespace WinFormsApp4
                         foreach (string basecyrens in baseCurrencies)
                         {
                             string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
-                            HttpResponseMessage recpon = await client.GetAsync(URL);
+                            HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
                             recpon.EnsureSuccessStatusCode();
-                            string jsconcl = await recpon.Content.ReadAsStringAsync();
+                            string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                             using (JsonDocument json = JsonDocument.Parse(jsconcl))
                             {
@@ -243,6 +238,6 @@ namespace WinFormsApp4
             }
             return "";
         }
-        
+
     }
 }
