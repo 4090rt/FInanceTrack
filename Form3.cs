@@ -1,6 +1,7 @@
 ﻿using System.Data.SQLite;
 using System.Security.Cryptography;
 using System.Text;
+using static WinFormsApp4.DIcreatebdusertest;
 
 namespace WinFormsApp4
 {
@@ -337,25 +338,16 @@ namespace WinFormsApp4
         {
             try
             {
-                string dbPath = GetDatabasePath();
+                var dbcon = new getdbph();
+                string dbPath = dbcon.getdbpath();
 
                 //MessageBox.Show($"Путь к БД Users: {dbPath}", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                using (var das = new SQLiteConnection($"Data Source={dbPath}"))
-                {
-                    await das.OpenAsync().ConfigureAwait(false);
-                    string createTableCommand = @"CREATE TABLE IF NOT EXISTS [Usersss] (
-                                 [ID] INTEGER PRIMARY KEY AUTOINCREMENT,
-                                 [Login]  UNIQUE,
-                                 [Password],
-                                 [Valute]
+                var dbopen = new getdbopen($"Data Source={dbPath}");
+                await dbopen.openbd();
 
-                             );";
+                var command = new getCommand();
+                await command.Newcom();
 
-                    using (var command = new SQLiteCommand(createTableCommand, das))
-                    {
-                        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                    }
-                }
             }
             catch (Exception ex)
             {
