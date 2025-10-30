@@ -78,5 +78,34 @@ namespace TestProjectWinFormsApp4_1_
 
             Assert.Null(exception);
         }
+
+        [Fact]
+        public async Task Test7()
+        {
+            var valutelocaltest = new smenadannix();
+
+            try
+            {
+                await valutelocaltest.valutelocal();
+            }
+            catch (Exception ex) when (ex.Message.Contains("Не удается создать директорию"))
+            {
+                Assert.Fail($"Не ожидалось исключение: {ex.Message}");
+            }
+            catch
+            {
+                Assert.Fail("Произошло непредвиденное исключение");
+            }
+        }
+
+        [Fact]
+        public async Task Test8()
+        {
+            var valutelocaltest = new smenadannix();
+
+            var result = await valutelocaltest.valutelocal();
+
+            Assert.NotNull(result);
+        }
     }
 }
