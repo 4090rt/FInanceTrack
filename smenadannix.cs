@@ -38,18 +38,29 @@ namespace WinFormsApp4
 
 
                 string directory = Path.GetDirectoryName(dbPath);
-                if (!Directory.Exists(directory))
+                if (Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
+                    var currencyService = new CurrencyService(dbPath);
+                    string userCurrency = await currencyService.GetUserCurrencyAsync(GlobalData.CurrentLogin);
+
+                    var currencyInter = await CurrencyFactory.CreateCurrencyServiceAsync(userCurrency);
+                    string currencyRates = await currencyInter.valutapros(userCurrency);
+                    _currentCurrency = await currencyInter.valutapros(userCurrency);
+                    return true;
                 }
-
-                var currencyService = new CurrencyService(dbPath);
-                string userCurrency = await currencyService.GetUserCurrencyAsync(GlobalData.CurrentLogin);
-
-                var currencyInter = await CurrencyFactory.CreateCurrencyServiceAsync(userCurrency);
-                string currencyRates = await currencyInter.valutapros(userCurrency);
-                _currentCurrency = await currencyInter.valutapros(userCurrency);
-                return true;
+                else 
+                {
+                    string directory1 = Path.GetDirectoryName(dbPath);
+                    MessageBox.Show("Не удалось найти директорию");
+                    await Task.Delay(1000);
+                    MessageBox.Show("Создаем директорию...");
+                    await Task.Delay(2000);
+                    Directory.CreateDirectory(directory1);
+                    MessageBox.Show("Директория успешно создана!");
+                    return true;
+                }
+                throw new Exception("Не удается создать директорию");
             }
             catch (Exception ex)
             {
