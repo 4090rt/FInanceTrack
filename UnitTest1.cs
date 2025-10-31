@@ -1,7 +1,9 @@
+using Aspose.Pdf.Operators;
 using Moq;
 using System;
 using System.Security.Policy;
 using WinFormsApp4;
+using Xunit.Sdk;
 using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace TestProjectWinFormsApp4_1_
@@ -34,7 +36,7 @@ namespace TestProjectWinFormsApp4_1_
             var hash = new Form3();
             var exception = Assert.Throws<Exception>(() => hash.hashpqpass(inalidpassword));
 
-            Assert.Contains("Ошибка", exception.Message); 
+            Assert.Contains("Ошибка", exception.Message);
 
         }
 
@@ -46,7 +48,7 @@ namespace TestProjectWinFormsApp4_1_
             string password = "dsdsdd";
             string hash1 = hash.hashpqpass(password);
             string hash2 = hash.hashpqpass(password);
-            Assert.Equal(hash1,hash2);
+            Assert.Equal(hash1, hash2);
         }
 
         [Fact]
@@ -106,6 +108,62 @@ namespace TestProjectWinFormsApp4_1_
             var result = await valutelocaltest.valutelocal();
 
             Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void Test9()
+        {
+            var newbdtest = new getdbph();
+
+            var result = newbdtest.getdbpath();
+
+
+            Assert.NotNull(result);
+            Assert.NotEmpty(result);
+            Assert.IsType<string>(result);
+        }
+
+        [Fact]
+        public async Task Test10()
+        {
+            var path = new getdbph();
+            var RESULTPATH = path.getdbpath();
+            string connectionString = $"Data Source={RESULTPATH}";
+            var newbdtest = new DIcreatebdusertest.getdbopen(connectionString);
+
+            var result = await newbdtest.openbd();
+
+            Assert.NotNull(result);
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task Test11()
+        { 
+            var newbdtest = new DIcreatebdusertest.getCommand();
+
+            var result = await newbdtest.Newcom();
+
+            Assert.NotNull(result);
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task Test12()
+        {
+            try
+            {
+                var newbdtest = new DIcreatebdusertest.getCommand();
+                Assert.True(true);
+            }
+            catch (NullReferenceException ex)
+            {
+                Assert.Fail($"NullReferenceException: {ex.Message}. Проверьте GetDatabasePath()");
+            }
+            catch (Exception ex)
+            {
+                Assert.DoesNotContain("Ошибка", ex.Message);
+            }
         }
     }
 }
