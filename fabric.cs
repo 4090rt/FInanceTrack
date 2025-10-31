@@ -19,14 +19,123 @@ namespace WinFormsApp4
 
         public interface Fabricinter
         {
-            void ExportExcelcustompath(string txtFilePath);
+            void Exportcustompath(string txtFilePath);
         }
 
         public enum Exportformat
         {
             PDF,
             Excel,
-            Word
+            Word,
+            HTML
+        }
+
+        public class ExportHTML : Fabricinter
+        {
+            private async Task<List<expense>> ReadExpensesFromTxt(string txtFilePath)
+            { 
+              var expenses = new List<expense>();
+                if (File.Exists(txtFilePath))
+                {
+                    string[] alllines = await File.ReadAllLinesAsync(txtFilePath).ConfigureAwait(false);
+                    var linesnotnull = alllines.Where(lines => !string.IsNullOrWhiteSpace(lines)).ToArray();
+
+                    for (int i = 0; i < linesnotnull.Length; i += 3)
+                    {
+                        if (i + 2 >= linesnotnull.Length)
+                            break;
+
+                        string category = linesnotnull[i].Trim();
+                        string count = linesnotnull[i + 1].Trim();
+                        string date = linesnotnull[i + 2].Trim();
+
+                        try
+                        {
+                            var newitemsadd = new expense
+                            {
+                                category = category,
+                                count = decimal.Parse(count),
+                                date = DateTime.Parse(date)
+                            };
+                            expenses.Add(newitemsadd);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Ошибка: {ex.Message}");
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Файл для экспорта не найден");
+                    return null;
+                }
+                return expenses;
+            }
+
+            public async Task ExportToHTML(string txtFilePath, string outputPath)
+            {
+                try
+                {
+                    var expenses = await ReadExpensesFromTxt(txtFilePath);
+
+                    Workbook workbook = new Workbook();
+                    Worksheet worksheet = workbook.Worksheets[0];
+                    worksheet.Name = "Расходы";
+
+                    // Заголовки
+                    worksheet.Cells["A1"].PutValue("Категория");
+                    worksheet.Cells["B1"].PutValue("Сумма");
+                    worksheet.Cells["C1"].PutValue("Дата");
+
+                    //данные
+                    int row = 2;
+                    foreach (var expense in expenses)
+                    {
+                        worksheet.Cells[$"A{row}"].PutValue(expense.category);
+                        worksheet.Cells[$"B{row}"].PutValue(expense.count);
+                        worksheet.Cells[$"C{row}"].PutValue(expense.date.ToString("dd.MM.yyyy"));
+                        row++;
+                    }
+                    // Стиль заголовков
+                    Aspose.Cells.Style headerStyle = workbook.CreateStyle();
+                    headerStyle.Font.IsBold = true;
+                    headerStyle.ForegroundColor = System.Drawing.Color.LightBlue;
+                    headerStyle.Pattern = BackgroundType.Solid;
+
+                    worksheet.Cells["A1"].SetStyle(headerStyle);
+                    worksheet.Cells["B1"].SetStyle(headerStyle);
+                    worksheet.Cells["C1"].SetStyle(headerStyle);
+
+                    worksheet.AutoFitColumns();
+                    workbook.Save(outputPath, Aspose.Cells.SaveFormat.Html);
+
+
+                    MessageBox.Show($"Файл сохранен: {outputPath}");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка экспорта: {ex.Message}");
+                }
+            }
+            public void Exportcustompath(string txtFilePath)
+            {
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.Filter = "HTML files (*.html)|*.html|All files (*.*)|*.*";
+                    saveFileDialog.Title = "Экспрот в HTML";
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var outputh = saveFileDialog.FileName;
+                        ExportToHTML(txtFilePath, outputh);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Export1 вызван с: {txtFilePath}");
+                        MessageBox.Show("Отменено пользователем");
+                    }
+                }
+            }
         }
 
         public class ExportExcel : Fabricinter
@@ -142,7 +251,7 @@ namespace WinFormsApp4
             }
 
             // 3. Главный метод экспорта сохранение
-            public void ExportExcelcustompath(string txtFilePath)
+            public void Exportcustompath(string txtFilePath)
             {
                 using (SaveFileDialog saveDialog = new SaveFileDialog())
                 {
@@ -260,7 +369,7 @@ namespace WinFormsApp4
             }
 
             //3. Главный метод экспорта сохранение
-            public void ExportExcelcustompath(string txtFilePath)
+            public void Exportcustompath(string txtFilePath)
             {
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
@@ -270,7 +379,7 @@ namespace WinFormsApp4
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         string outputPath = saveFileDialog.FileName;
-                        ExportToPDF(outputPath, txtFilePath);
+                        ExportToPDF(txtFilePath, outputPath);
                     }
                     else
                     {
@@ -375,7 +484,7 @@ namespace WinFormsApp4
             }
 
             //3. Главный метод экспорта сохранение
-            public void ExportExcelcustompath(string txtFilePath)
+            public void Exportcustompath(string txtFilePath)
             {
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
@@ -386,7 +495,7 @@ namespace WinFormsApp4
                         if (saveFileDialog.ShowDialog() == DialogResult.OK)
                         {
                             string outputPath = saveFileDialog.FileName;
-                            ExportToWord(outputPath, txtFilePath);
+                            ExportToWord(txtFilePath, outputPath);
                         }
                         else
                         {
@@ -410,6 +519,7 @@ namespace WinFormsApp4
                     Exportformat.Excel => new ExportExcel(),
                     Exportformat.Word => new ExportWord(),
                     Exportformat.PDF => new ExportPdf(),
+                    Exportformat.HTML => new ExportHTML(),
                     _ => throw new ArgumentException($"Неизвестный формат {exportformat}")
                 };
           }

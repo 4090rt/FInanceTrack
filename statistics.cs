@@ -315,7 +315,7 @@ namespace WinFormsApp4
 
         public void massivcombfabric()
         {
-            string[] massiv = ["Экспорт Excel", "Экспорт PDF", "Экспорт Word"];
+            string[] massiv = ["Экспорт Excel", "Экспорт PDF", "Экспорт Word", "Экспорт HTML"];
             comboBox3.Items.AddRange(massiv);
         }
 
@@ -337,7 +337,7 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.PDF;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.ExportExcelcustompath(txtFilePath);
+                exporter.Exportcustompath(txtFilePath);
             }
 
             if (comboBox3.Text == "Экспорт Excel")
@@ -345,7 +345,7 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.Excel;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.ExportExcelcustompath(txtFilePath);
+                exporter.Exportcustompath(txtFilePath);
             }
 
             if (comboBox3.Text == "Экспорт Word")
@@ -353,7 +353,15 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.Word;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.ExportExcelcustompath(txtFilePath);
+                exporter.Exportcustompath(txtFilePath);
+            }
+
+            if (comboBox3.Text == "Экспорт HTML")
+            {
+                var exportformat = Exportformat.HTML;
+                var factory = new Exports();
+                var exporter = factory.Fabricexports(exportformat);
+                exporter.Exportcustompath(txtFilePath);
             }
         }
     }
