@@ -364,21 +364,30 @@ namespace WinFormsApp4
             string Login = textBox1.Text;
             string Password = textBox2.Text;
             string Valute = comboBox2.Text;
-            try
+            validpassword validpass = new validpassword();
+            var proverpapass = validpass.Passwortd(Password);
+            if (proverpapass)
             {
-                bool result = await _userRepository.SaveUserAsync(Login, Password, Valute);
-                if (result)
+                try
                 {
-                    MessageBox.Show("Успешно Сохранено");
+                    bool result = await _userRepository.SaveUserAsync(Login, Password, Valute);
+                    if (result)
+                    {
+                        MessageBox.Show("Успешно Сохранено");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Ошибка сохранения");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Ошибка сохранения");
+                    MessageBox.Show("Возникло исключение" + ex.Message, "Ошибка" + MessageBoxIcon.Error + MessageBoxButtons.OK);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Возникло исключение"  + ex.Message, "Ошибка" + MessageBoxIcon.Error + MessageBoxButtons.OK);
+                return;
             }
         }
 

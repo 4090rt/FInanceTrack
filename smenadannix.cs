@@ -207,46 +207,55 @@ namespace WinFormsApp4
             string Login = GlobalData.CurrentLogin;
             string Password = GlobalData.CurrentPassword;
             Form3 form = new Form3();
+            validpassword validpass = new validpassword();
+            var proverpapass = validpass.Passwortd(Passwordd);
             string dbPath = form.GetDatabasePath();
             var userproverka = form.vakidateuser(Login, Password);
             string hashpas = form.hashpqpass(Passwordd);
 
             if (await userproverka)
             {
-                if (!string.IsNullOrEmpty(Passwordd) && !string.IsNullOrEmpty(parolrepeat))
+                if (proverpapass)
                 {
-                    if (Passwordd == parolrepeat)
+                    if (!string.IsNullOrEmpty(Passwordd) && !string.IsNullOrEmpty(parolrepeat))
                     {
-                        try
+                        if (Passwordd == parolrepeat)
                         {
-                            using (SQLiteConnection connection = new SQLiteConnection($"Data Source={dbPath}"))
+                            try
                             {
-                                await connection.OpenAsync().ConfigureAwait(false);
-                                using (var command = new SQLiteCommand($"UPDATE Usersss SET Password = @newPassword WHERE Login = @L", connection))
+                                using (SQLiteConnection connection = new SQLiteConnection($"Data Source={dbPath}"))
                                 {
-                                    command.Parameters.AddWithValue("@L", Login);
-                                    command.Parameters.AddWithValue("@newPassword", hashpas);
-                                    await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                    MessageBox.Show("Вы успешно сменили пароль", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    return true;
+                                    await connection.OpenAsync().ConfigureAwait(false);
+                                    using (var command = new SQLiteCommand($"UPDATE Usersss SET Password = @newPassword WHERE Login = @L", connection))
+                                    {
+                                        command.Parameters.AddWithValue("@L", Login);
+                                        command.Parameters.AddWithValue("@newPassword", hashpas);
+                                        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                                        MessageBox.Show("Вы успешно сменили пароль", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        return true;
+                                    }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Не удалось сменить пароль! {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return false;
+                            }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            MessageBox.Show($"Не удалось сменить пароль! {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show($"Пароли не совпадают!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
                     }
                     else
                     {
-                        MessageBox.Show($"Пароли не совпадают!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                 }
                 else
                 {
-                    MessageBox.Show($"Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
             }
