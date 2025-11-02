@@ -165,5 +165,25 @@ namespace TestProjectWinFormsApp4_1_
                 Assert.DoesNotContain("Ошибка", ex.Message);
             }
         }
+
+        [Theory]
+        [InlineData("dssd")]
+        [InlineData("password123")]
+        [InlineData("hello world")]
+        [InlineData("123456")]
+        public void Test13(string password)
+        {
+            try
+            {
+                var valipass = new validpassword();
+                var result = valipass.Passwortd(password);
+
+                Assert.False(result);
+            }
+            catch (NullReferenceException ex)
+            {
+                Assert.Fail($"NullReferenceException: {ex.Message}");
+            }
+        }
     }
 }
