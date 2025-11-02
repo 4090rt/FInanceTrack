@@ -32,6 +32,8 @@ namespace WinFormsApp4
 
             public List<expense> Filter(List<expense> expenses, DateTime now)
             {
+                if (expenses==null || !expenses.Any())
+                    return new List<expense>();
                 IEnumerable<expense> filtered = Enumerable.Empty<expense>();
 
                         filtered = expenses
@@ -43,7 +45,12 @@ namespace WinFormsApp4
 
             }
             public void DisplayResults(List<expense> filtered, ListView listView, FormsPlot plot)
-            { 
+            {
+                if (filtered == null || !filtered.Any())
+                { 
+                    plot.Visible =false;
+                    return;
+                }
                     listView.Items.Clear();
 
                 foreach (var exp in filtered)
@@ -80,6 +87,8 @@ namespace WinFormsApp4
             }
             public List<expense> Filter(List<expense> expenses, DateTime now)
             {
+                if (expenses == null || !expenses.Any())
+                    return new List<expense>();
                 IEnumerable<expense> filtered = Enumerable.Empty<expense>();
                 DateTime periodStart = now.Date.AddDays(-6);
                 filtered = expenses
@@ -87,11 +96,16 @@ namespace WinFormsApp4
                      .ToList();
                 return _selfilter == "По возрастанию затрат"
                     ? filtered.OrderBy(r => r.count).ToList()
-                    : filtered.OrderByDescending(r => r.count).ToList();    
+                    : filtered.OrderByDescending(r => r.count).ToList();
             }
 
             public void DisplayResults(List<expense> filtered, ListView listView, FormsPlot plot)
-            { 
+            {
+                if (filtered == null || !filtered.Any())
+                {
+                    plot.Visible = false;
+                    return;
+                }
                 listView.Clear();
                 foreach (var exp in filtered)
                 {
@@ -100,8 +114,6 @@ namespace WinFormsApp4
                     item.SubItems.Add(exp.date.ToString("dd.MM.yyyy"));
                     listView.Items.Add(item);
                 }
-
-
                 plot.Visible = true;
                 plot.Plot.Clear();
                 double[] values = filtered.Select(e => (double)e.count).ToArray();
@@ -127,6 +139,8 @@ namespace WinFormsApp4
 
             public List<expense> Filter(List<expense> expenses, DateTime now)
             {
+                if (expenses == null || !expenses.Any())
+                    return new List<expense>();
                 IEnumerable<expense> filtered = Enumerable.Empty<expense>();
                 DateTime periodStart = new DateTime(now.Year, now.Month, 1);
                 filtered = expenses
@@ -139,6 +153,11 @@ namespace WinFormsApp4
 
             public void DisplayResults(List<expense> filtered, ListView listView, FormsPlot plot)
             {
+                if (filtered == null || !filtered.Any())
+                {
+                    plot.Visible = false;
+                    return;
+                }
                listView.Items.Clear();
                 foreach (var exp in filtered)
                 {
@@ -174,11 +193,12 @@ namespace WinFormsApp4
 
             public List<expense> Filter(List<expense> expenses, DateTime now)
             {
+                if (expenses == null || !expenses.Any())
+                    return new List<expense>();
                 DateTime periodStart = new DateTime(now.Year, 1, 1);
                 IEnumerable<expense> filtered = Enumerable.Empty<expense>();
                 filtered = expenses
                         .Where(e => e.date.Date >= periodStart && e.date.Date <= now.Date)
-                        .OrderBy(r => r.count)
                         .ToList();
                 return _selfilter == "По возрастанию затрат"
                 ? filtered.OrderBy(r => r.count).ToList()
@@ -187,6 +207,11 @@ namespace WinFormsApp4
 
             public void DisplayResults(List<expense> filtered, ListView listView, FormsPlot plot)
             {
+                if (filtered == null || !filtered.Any())
+                {
+                    plot.Visible = false;
+                    return;
+                }
                 listView.Items.Clear();
                 foreach (var exp in filtered)
                 {

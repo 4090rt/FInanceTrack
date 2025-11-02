@@ -9,17 +9,85 @@ namespace WinFormsApp4
         {
             InitializeComponent();
             massivoperaciy();
+            viewLogin();
         }
 
+        // Получение логина из бд для отображения
+        public async Task<string> pokazLogin()
+        {
+            var form3 = new Form3();
+            string dppath = form3.GetDatabasePath();
+            try
+            {
+                using (var connect = new SQLiteConnection($"Data Source={dppath}"))
+                {
+                    await connect.OpenAsync().ConfigureAwait(false);
 
+                    string Login = GlobalData.CurrentLogin;
+
+                    if (!string.IsNullOrEmpty(Login))
+                    {
+                        try
+                        {
+                            using (var newcommand = new SQLiteCommand("SELECT Login FROM Usersss WHERE Login = @L", connect))
+                            {
+                                newcommand.Parameters.AddWithValue("@L", Login);
+                                var result = await newcommand.ExecuteScalarAsync().ConfigureAwait(false);
+                                string result2 = result.ToString();
+                                return result2;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Ошибка создания подключения или получения логина" + ex.Message);
+                            return false.ToString();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Невохможно отобразить логин");
+                        return false.ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Непредвиденная ошибка" + ex.Message);
+                return false.ToString();
+            }
+        }
+
+        //Отображение логина на экране
+        public async Task<bool> viewLogin()
+        {
+            try
+            {
+                var Login = await pokazLogin();
+                string Loginconvert = Login.ToString();
+
+                if (!string.IsNullOrEmpty(Loginconvert))
+                {
+                    label5.Text = Loginconvert;
+                    return true;
+                }
+                else
+                {
+                    label5.Text = ("Не вохможно отобразить текст");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Не удалось получить логин для отображения" + ex.Message);
+                return false;
+            }
+        }
         // массив с доступными валютами
         public void massivoperaciy()
         {
             string[] massivvalute = { "RUB", "EUR", "USD" };
             comboBox1.Items.AddRange(massivvalute);
         }
-
-
 
         // метод показывающий текущую валоюту 
         public async Task<bool> valutelocal()
