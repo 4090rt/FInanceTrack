@@ -1,4 +1,5 @@
-﻿using System.Data.SQLite;
+﻿using Aspose.Pdf.Operators;
+using System.Data.SQLite;
 using System.Security.Cryptography;
 using System.Text;
 using static WinFormsApp4.DIcreatebdusertest;
@@ -39,6 +40,7 @@ namespace WinFormsApp4
         //валидация(авторизация юзера)
         public async Task<bool> vakidateuser(string Login, string Password)
         {
+
             if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
             {
                 MessageBox.Show("Введите логин и пароль!");
@@ -50,7 +52,6 @@ namespace WinFormsApp4
             {
                 MessageBox.Show("База данных не найдена!");
                 MessageBox.Show("Подождите.. База данных создается");
-                createbduser();
                 return true;
             }
 
@@ -358,27 +359,30 @@ namespace WinFormsApp4
         //регистрация(сохранения юзера)
         private async void button1_Click(object sender, EventArgs e)
         {
+            createbduser();
             string dbPath = GetDatabasePath();
             var hashService = new reposit.HashService();
             _userRepository = new reposit.Realiz(dbPath, hashService);
             string Login = textBox1.Text;
             string Password = textBox2.Text;
             string Valute = comboBox2.Text;
+            string Mail = textBox3.Text;
             validpassword validpass = new validpassword();
             var proverpapass = validpass.Passwortd(Password);
             if (proverpapass)
             {
                 try
                 {
-                    bool result = await _userRepository.SaveUserAsync(Login, Password, Valute);
-                    if (result)
-                    {
-                        MessageBox.Show("Успешно Сохранено");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Ошибка сохранения");
-                    }
+                    bool result = await _userRepository.SaveUserAsync(Login, Password, Valute,Mail);
+
+                        if (result)
+                        {
+                            MessageBox.Show("Успешно Сохранено");
+                        }
+                        else
+                        {
+                            MessageBox.Show("Ошибка сохранения");
+                        }
                 }
                 catch (Exception ex)
                 {
@@ -411,18 +415,10 @@ namespace WinFormsApp4
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            smenadannix smenn = new smenadannix();
-            smenn.Show();
+            Smenaparolyasms form = new Smenaparolyasms();
+            form.Show();
             this.Hide();
         }
-
-        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            smenadannix smenn = new smenadannix();
-            smenn.Show();
-            this.Hide();
-        }
-
     }
 
 
