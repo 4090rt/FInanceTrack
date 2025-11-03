@@ -8,7 +8,7 @@ using static WinFormsApp4.DIcreatebdusertest;
 
 namespace WinFormsApp4
 {
-    internal class DIcreatebdusertest
+    public class DIcreatebdusertest
     {
         //получения пути к бд
         public interface DBPath
@@ -18,12 +18,12 @@ namespace WinFormsApp4
         // открытие подключения к бд
         public interface DBOPEN
         {
-            Task openbd();
+            Task<bool> openbd();
         }
-        // новый команда
+        // новая команда
         public interface DBnewCom
         {
-            Task Newcom();
+            Task<bool> Newcom();
         }
 
 
@@ -33,46 +33,55 @@ namespace WinFormsApp4
             private readonly string _connectionString;
             private SQLiteConnection _connection;
             public getdbopen(string connectionString)
-            { 
+            {
                 _connectionString = connectionString;
             }
 
-            public async Task openbd()
+            public async Task<bool> openbd()
             {
-                using (_connection = new SQLiteConnection(_connectionString))
-                {
-                    await _connection.OpenAsync().ConfigureAwait(false);
-                }
+                _connection = new SQLiteConnection(_connectionString);
+
+                await _connection.OpenAsync().ConfigureAwait(false);
+                return true;
             }
             public SQLiteConnection GetConnection() => _connection;
+   
         }
 
         // новый команда
         public class getCommand : DBnewCom
         {
-            public async Task Newcom()
+            public async Task<bool> Newcom()
             {
-                var path = new getdbph();
-                var RESULTPATH = path.getdbpath();
+                try
+                {
+                    var path = new getdbph();
+                    var RESULTPATH = path.getdbpath();
 
-                var openconnect = new getdbopen($"Data Source={RESULTPATH}");
+                    var openconnect = new getdbopen($"Data Source={RESULTPATH}");
 
-                await openconnect.openbd().ConfigureAwait(false);
+                    await openconnect.openbd().ConfigureAwait(false);
 
-                var connection = openconnect.GetConnection();
+                    var connection = openconnect.GetConnection();
 
-                string createTableCommand = @"CREATE TABLE IF NOT EXISTS [Usersss] (
+                    string createTableCommand = @"CREATE TABLE IF NOT EXISTS [Usersss] (
                              [ID] INTEGER PRIMARY KEY AUTOINCREMENT,
                              [Login]  UNIQUE,
                              [Password],
-                             [Valute]
+                             [Valute],
+                             [Mail]
                          );";
 
-                    using(var command = new SQLiteCommand(createTableCommand,connection))
-                    {
-                       await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                    }
+                    var command = new SQLiteCommand(createTableCommand, connection);
+                    await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    return true;
+
                 }
+                catch
+                {
+                    throw new Exception("Ошибка");
+                }
+             }
             }
         }
             //получения пути к бд

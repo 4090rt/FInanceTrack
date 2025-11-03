@@ -13,7 +13,7 @@ namespace WinFormsApp4
 
         public interface IUser
         {
-            Task<bool> SaveUserAsync(string Login, string Password, string Valute);
+            Task<bool> SaveUserAsync(string Login, string Password, string Valute, string Mail);
         }
 
 
@@ -63,11 +63,11 @@ namespace WinFormsApp4
                 _hashService = hashService;
             }
 
-            public async Task<bool> SaveUserAsync(string login, string password, string valute)
+            public async Task<bool> SaveUserAsync(string login, string password, string valute, string Mail)
             {
                 try
                 {
-                    if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(valute))
+                    if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(valute) || string.IsNullOrEmpty(Mail))
                     {
                         MessageBox.Show("Заполните поля!");
                         return false;
@@ -80,11 +80,12 @@ namespace WinFormsApp4
                         {
                             await connect.OpenAsync().ConfigureAwait(false);
 
-                            using var command = new SQLiteCommand("INSERT INTO [Usersss] (Login, Password, Valute) VALUES (@L, @HP, @V)", connect);
+                            using var command = new SQLiteCommand("INSERT INTO [Usersss] (Login, Password, Valute, Mail) VALUES (@L, @HP, @V, @M)", connect);
                             {
                                 command.Parameters.AddWithValue("@L", login);
                                 command.Parameters.AddWithValue("@HP", hashpass);
                                 command.Parameters.AddWithValue("@V", valute);
+                                command.Parameters.AddWithValue("@M", Mail);
 
                                 int result = await command.ExecuteNonQueryAsync();
                                 MessageBox.Show("Успех!");
@@ -95,6 +96,7 @@ namespace WinFormsApp4
                     else
                     {
                         MessageBox.Show("Такой логин уже существует");
+                        return false;
                     }
                 }
                 catch (Exception ex)
