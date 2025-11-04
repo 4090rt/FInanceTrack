@@ -18,10 +18,10 @@ namespace WinFormsApp4
                     MessageBox.Show("Пароль должен содержать от 8 символов");
                     return false;
                 }
-                string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
-                MessageBox.Show($"=== ДИАГНОСТИКА ПАРОЛЯ ===");
-                MessageBox.Show($"Введенный пароль: '{password}'");
-                MessageBox.Show($"Длина пароля: {password.Length} символов");
+                    string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
+                    //MessageBox.Show($"=== ДИАГНОСТИКА ПАРОЛЯ ===");
+                    //MessageBox.Show($"Введенный пароль: '{password}'");
+                    //MessageBox.Show($"Длина пароля: {password.Length} символов");
                 if (!Regex.IsMatch(password, pattern))
                 {
                     MessageBox.Show("Пароль должен содержать минимум одну заглавную букву, одну строчную букву, одну цифру и один специальный символ");
