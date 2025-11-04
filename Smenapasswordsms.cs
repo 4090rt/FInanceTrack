@@ -21,9 +21,9 @@ namespace WinFormsApp4
         // порт безопасности 
         private readonly int _port = 587;
         // почта с которой отправляем 
-        private readonly string _gmail = "artem2007yannurow@gmail.com";
+        private readonly string _gmail = "";
         // пароль от почты
-        private readonly string _passwordmail = "mdyh mrza nlki drry";
+        private readonly string _passwordmail = "";
 
         public async Task SendVerificationCodeAsync(string email, int code)
         {
@@ -174,3 +174,4 @@ namespace WinFormsApp4
         }
     }
 }
+
