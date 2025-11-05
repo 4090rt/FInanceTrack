@@ -377,7 +377,8 @@ namespace WinFormsApp4
 
                         if (result)
                         {
-                            MessageBox.Show("Успешно Сохранено");
+                        var notifications = new Notral1();
+                        notifications.Not();
                         }
                         else
                         {
@@ -407,6 +408,8 @@ namespace WinFormsApp4
             {
                 // Сохраняем логин и пароль в глобальную переменную
                 GlobalData.SetCurrentUser(Login, Password);
+                var notification = new Notral2();
+                notification.Not();
                 Form2 form2 = new Form2();
                 form2.Show();
                 this.Hide();
@@ -415,7 +418,8 @@ namespace WinFormsApp4
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Smenaparolyasms form = new Smenaparolyasms();
+            int code = 0;
+            Smenaparolyasms form = new Smenaparolyasms(code);
             form.Show();
             this.Hide();
         }

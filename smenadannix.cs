@@ -153,7 +153,7 @@ namespace WinFormsApp4
 
             if (await userproverka)
             {
-                if (_currentCurrency == newvalute)
+                if (_currentCurrency != newvalute)
                 {
                     if (!string.IsNullOrEmpty(newvalute))
                     {
@@ -167,7 +167,8 @@ namespace WinFormsApp4
                                     command.Parameters.AddWithValue("@L", GlobalData.CurrentLogin);
                                     command.Parameters.AddWithValue("@NEWvalute", newvalute);
                                     await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                    MessageBox.Show("Вы успешно сменили валюту!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    var notification = new Notral4();
+                                    notification.Not();
                                     return true;
                                 }
                             }
@@ -231,7 +232,8 @@ namespace WinFormsApp4
                                         command.Parameters.AddWithValue("@L", Login);
                                         command.Parameters.AddWithValue("@newPassword", hashpas);
                                         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                        MessageBox.Show("Вы успешно сменили пароль", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        var notification = new Notral3();
+                                        notification.Not();
                                         return true;
                                     }
                                 }
