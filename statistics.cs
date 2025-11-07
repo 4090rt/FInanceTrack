@@ -187,15 +187,15 @@ namespace WinFormsApp4
 
 
 
-
-
-
-
         //основной метод для отображения и фильтрации статистики по давности/убыванию и возрастанию расходов
         public async Task filtretranzaction()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string filePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.tt");
+            string filePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
+
+            //MessageBox.Show($"Файл существует: {File.Exists(filePath)}");
+            //MessageBox.Show($"Ожидаемый путь: {filePath}");
+            //MessageBox.Show($"CurrentLogin: '{GlobalData.CurrentLogin}'");
 
             if (!File.Exists(filePath))
             {
@@ -203,15 +203,15 @@ namespace WinFormsApp4
                 MessageBox.Show("Файл данных создан. Данных для фильтрации нет.");
                 return;
             }
-
-
-
-
-
-
+            FileInfo fileinfo = new FileInfo(filePath);
+            if (fileinfo.Length == 0)
+            {
+                MessageBox.Show("Файл существует, но пуст");
+            }
 
             string[] massivdannyx = await File.ReadAllLinesAsync(filePath, Encoding.UTF8);
             string[] nolines = massivdannyx.Where(l => !string.IsNullOrEmpty(l)).ToArray();
+            //MessageBox.Show($"Прочитано строк из файла: {massivdannyx.Length}, после фильтрации: {nolines.Length}");
 
             List<expense> expenses = new List<expense>();
             for (int i = 0; i < nolines.Length; i += 3)
@@ -247,8 +247,6 @@ namespace WinFormsApp4
             }
 
 
-
-
             listView1.Items.Clear();
 
             string selectedFilter = comboBox1.Text?.Trim();
@@ -268,16 +266,12 @@ namespace WinFormsApp4
             var filteredd = FilterStrategyFactory.CreateFilterStrategy(selectedFilter, selectedfilter2);
             var filtereddd = filteredd.Filter(expenses, now);
             filteredd.DisplayResults(filtereddd, listView1, formsPlot1);
+            MessageBox.Show(filtereddd.Count().ToString());
 
 
-
-            if (!filtered.Any())
+            if (!filtereddd.Any())
             {
                 MessageBox.Show("Нет данных для отображения по выбранным фильтрам");
-            }
-            else
-            {
-                MessageBox.Show($"Отображено {filtered.Count()} записей");
             }
         }
 
@@ -301,17 +295,14 @@ namespace WinFormsApp4
             }
         }
 
-        private void groupBox2_Enter(object sender, EventArgs e)
-        {
-
-        }
-
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Form2 form2 = new Form2();
             form2.Show();
             this.Hide();
         }
+
+
 
         public void massivcombfabric()
         {
@@ -320,9 +311,9 @@ namespace WinFormsApp4
         }
 
 
-
-        private void label6_Click(object sender, EventArgs e)
+        private async void label6_Click(object sender, EventArgs e)
         {
+            
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string txtFilePath = Path.Combine(documentsPath, $"{GlobalData.CurrentLogin}.txt");
             //MessageBox.Show($"Пытаемся открыть: {txtFilePath}");
@@ -337,7 +328,8 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.PDF;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.Exportcustompath(txtFilePath);
+                string path = await exporter.Exportcustompath(txtFilePath);
+                var clas = new ExporttoPdf(path);
             }
 
             if (comboBox3.Text == "Экспорт Excel")
@@ -345,7 +337,8 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.Excel;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.Exportcustompath(txtFilePath);
+                string path = await exporter.Exportcustompath(txtFilePath);
+                var clas = new ExporttoExcel(path);  
             }
 
             if (comboBox3.Text == "Экспорт Word")
@@ -353,7 +346,8 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.Word;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.Exportcustompath(txtFilePath);
+                string path = await exporter.Exportcustompath(txtFilePath);
+                var clas = new ExporttoWord(path);
             }
 
             if (comboBox3.Text == "Экспорт HTML")
@@ -361,7 +355,8 @@ namespace WinFormsApp4
                 var exportformat = Exportformat.HTML;
                 var factory = new Exports();
                 var exporter = factory.Fabricexports(exportformat);
-                exporter.Exportcustompath(txtFilePath);
+                string path = await exporter.Exportcustompath(txtFilePath);
+                var clas = new ExporttoHTML(path);
             }
         }
     }
