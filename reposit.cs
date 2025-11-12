@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace WinFormsApp4
 {
@@ -74,29 +75,35 @@ namespace WinFormsApp4
                     }
                     string hashpass = _hashService.HashPassword(password);
 
-                    if (!await IsLoginExistsAsync(login).ConfigureAwait(false))
+                    if (await Indexproverka())
                     {
-                        using var connect = new SQLiteConnection($"Data Source={_dbPath}");
+                        if (!await IsLoginExistsAsync(login).ConfigureAwait(false))
                         {
-                            await connect.OpenAsync().ConfigureAwait(false);
-
-                            using var command = new SQLiteCommand("INSERT INTO [Usersss] (Login, Password, Valute, Mail) VALUES (@L, @HP, @V, @M)", connect);
+                            using var connect = new SQLiteConnection($"Data Source={_dbPath}");
                             {
-                                command.Parameters.AddWithValue("@L", login);
-                                command.Parameters.AddWithValue("@HP", hashpass);
-                                command.Parameters.AddWithValue("@V", valute);
-                                command.Parameters.AddWithValue("@M", Mail);
+                                await connect.OpenAsync().ConfigureAwait(false);
 
-                                int result = await command.ExecuteNonQueryAsync();
-                                MessageBox.Show("Успех!");
-                                return result > 0;
+                                using var command = new SQLiteCommand("INSERT INTO [Usersss] (Login, Password, Valute, Mail) VALUES (@L, @HP, @V, @M)", connect);
+                                {
+                                    command.Parameters.AddWithValue("@L", login);
+                                    command.Parameters.AddWithValue("@HP", hashpass);
+                                    command.Parameters.AddWithValue("@V", valute);
+                                    command.Parameters.AddWithValue("@M", Mail);
+
+                                    int result = await command.ExecuteNonQueryAsync();
+                                    return result > 0;
+                                }
                             }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Такой логин уже существует");
+                            return false;
                         }
                     }
                     else
                     {
-                        MessageBox.Show("Такой логин уже существует");
-                        return false;
+                        MessageBox.Show("Индекс НЕ работает");
                     }
                 }
                 catch (Exception ex)
@@ -114,25 +121,65 @@ namespace WinFormsApp4
                     using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                     {
                         await connect.OpenAsync().ConfigureAwait(false);
+                        using (var comand = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
+                        {
+                            await comand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        }
+                        using (var command = new SQLiteCommand("SELECT COUNT(1) FROM [Usersss] WHERE Login = @L", connect))
+                        {
+                            command.Parameters.AddWithValue("@L", login);
+                            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                            return Convert.ToInt32(result) > 0;
 
-                        using var command = new SQLiteCommand(
-                            "SELECT COUNT(1) FROM [Usersss] WHERE Login = @L",
-                            connect);
-
-                        command.Parameters.AddWithValue("@L", login);
-                        var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
-                        return Convert.ToInt32(result) > 0;
+                        }
                     }
 
-                    }
+                }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Ошибка проверки логина: {ex.Message}");
                     return false;
                 }
             }
+            public async Task<bool> Indexproverka()
+            {
+                string login = "ssdssds12";
+                try
+                {
+                    using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
+                    {
+                        await connect.OpenAsync().ConfigureAwait(false);
+
+                        await IsLoginindexAsync().ConfigureAwait(false);
+                        using (var command = new SQLiteCommand("SELECT name FROM sqlite_master WHERE type='index' AND name='IX_Usersss_Login'", connect))
+                        {
+                            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                            bool index = result != null;
+
+                            MessageBox.Show(index ? $"✅ Индекс '{index.ToString()}' создан успешно!" : "❌ Индекс не создан");
+                            return index;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Возникло исключение:" + ex.Message);
+                    return false;
+                }
+            }
+
+            public async Task IsLoginindexAsync()
+            {
+                using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
+                {
+                    await connect.OpenAsync().ConfigureAwait(false);
+
+                    using (var command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
+                    {
+                         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    }
+                }
+            }
         }
-
-
     }
 }

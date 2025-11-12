@@ -1,5 +1,8 @@
-﻿using System.Data.SQLite;
-
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.ApplicationServices;
+using ScottPlot.Hatches;
+using System.Data.SQLite;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 namespace WinFormsApp4
 {
     public partial class smenadannix : Form
@@ -10,60 +13,107 @@ namespace WinFormsApp4
             InitializeComponent();
             massivoperaciy();
             viewLogin();
+           
         }
 
         // Получение логина из бд для отображения
-        public async Task<string> pokazLogin()
+        public class PokazLogina
         {
-            var form3 = new Form3();
-            string dppath = form3.GetDatabasePath();
-            try
-            {
-                using (var connect = new SQLiteConnection($"Data Source={dppath}"))
+            private string _dbPath;
+
+            public void usepathindex()
+            { 
+                Form3 form = new Form3();
+                _dbPath = form.GetDatabasePath();
+            }
+
+            public async Task<string> pokazLogin()
+            {              
+                try
                 {
-                    await connect.OpenAsync().ConfigureAwait(false);
-
-                    string Login = GlobalData.CurrentLogin;
-
-                    if (!string.IsNullOrEmpty(Login))
+                    using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                     {
-                        try
+                        await connect.OpenAsync().ConfigureAwait(false);
+
+                        string Login = GlobalData.CurrentLogin;
+
+                        if (!string.IsNullOrEmpty(Login))
                         {
-                            using (var newcommand = new SQLiteCommand("SELECT Login FROM Usersss WHERE Login = @L", connect))
+                            try
                             {
-                                newcommand.Parameters.AddWithValue("@L", Login);
-                                var result = await newcommand.ExecuteScalarAsync().ConfigureAwait(false);
-                                string result2 = result.ToString();
-                                return result2;
+                                using (var command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
+                                {
+                                    await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                                }
+
+                                using (var newcommand = new SQLiteCommand("SELECT Login FROM Usersss WHERE Login = @L", connect))
+                                    {
+                                        newcommand.Parameters.AddWithValue("@L", Login);
+                                        var result = await newcommand.ExecuteScalarAsync().ConfigureAwait(false);
+                                        string result2 = result.ToString();
+                                        return result2;
+                                    }
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Ошибка создания подключения или получения логина" + ex.Message);
+                                return false.ToString();
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            MessageBox.Show("Ошибка создания подключения или получения логина" + ex.Message);
+                            MessageBox.Show("Невохможно отобразить логин");
                             return false.ToString();
                         }
                     }
-                    else
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Непредвиденная ошибка" + ex.Message);
+                    return false.ToString();
+                }
+        }
+            // ПРОВЕРКА ИНДЕКСА
+            public async Task<bool> IsIndexWorkingAsync()
+            {
+                try
+                {
+                    string testLogin = "test_user_123";
+                    using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                     {
-                        MessageBox.Show("Невохможно отобразить логин");
-                        return false.ToString();
+                        await connect.OpenAsync();
+
+                        using (var command = new SQLiteCommand(
+                            "SELECT name FROM sqlite_master WHERE type='index' AND name='IX_Usersss_Login'",
+                            connect))
+                        {
+                            var indexName = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                            bool indexExists = indexName != null;
+
+                            MessageBox.Show(indexExists ? $"✅ Индекс '{(string)indexName}' создан успешно!" : "❌ Индекс не создан");
+
+                            return indexExists;
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Непредвиденная ошибка" + ex.Message);
-                return false.ToString();
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Возникло исключение:" + ex.Message);
+                    return false;
+                }
             }
         }
-
         //Отображение логина на экране
         public async Task<bool> viewLogin()
         {
             try
             {
-                var Login = await pokazLogin();
-                string Loginconvert = Login.ToString();
+                var pokaz = new PokazLogina();
+                pokaz.usepathindex();
+                var result =  await pokaz.pokazLogin();
+                bool indexWorking = await pokaz.IsIndexWorkingAsync();
+                MessageBox.Show(indexWorking ? "Индекс работает!" : "Индекс НЕ работает");
+                string Loginconvert = result.ToString();
 
                 if (!string.IsNullOrEmpty(Loginconvert))
                 {
@@ -82,6 +132,11 @@ namespace WinFormsApp4
                 return false;
             }
         }
+
+
+
+
+
         // массив с доступными валютами
         public void massivoperaciy()
         {
