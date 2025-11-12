@@ -75,7 +75,7 @@ namespace WinFormsApp4
                     }
                     string hashpass = _hashService.HashPassword(password);
 
-                    if (await Indexproverka())
+                    if (await Indexproverka().ConfigureAwait(false))
                     {
                         if (!await IsLoginExistsAsync(login).ConfigureAwait(false))
                         {
@@ -121,10 +121,6 @@ namespace WinFormsApp4
                     using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                     {
                         await connect.OpenAsync().ConfigureAwait(false);
-                        using (var comand = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
-                        {
-                            await comand.ExecuteNonQueryAsync().ConfigureAwait(false);
-                        }
                         using (var command = new SQLiteCommand("SELECT COUNT(1) FROM [Usersss] WHERE Login = @L", connect))
                         {
                             command.Parameters.AddWithValue("@L", login);

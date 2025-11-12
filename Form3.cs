@@ -71,24 +71,32 @@ namespace WinFormsApp4
                 await das.OpenAsync().ConfigureAwait(false);
                 try
                 {
-                    using (var gg = new SQLiteCommand("SELECT Password FROM Usersss WHERE Login = @L LIMIT 1", das))
+                    if (await vakidateuserindexprovarka().ConfigureAwait(false))
                     {
-                        gg.Parameters.AddWithValue("@L", Login);
-                        var value = await gg.ExecuteScalarAsync().ConfigureAwait(false);
-                        if (value == null || value == DBNull.Value)
+                        using (var gg = new SQLiteCommand("SELECT Password FROM Usersss WHERE Login = @L LIMIT 1", das))
                         {
-                            MessageBox.Show("Пользователь с таким логином не найден! Зарегестрируйтесь!");
-                            return false;
-                        }
-                        string pasd = Convert.ToString(value);
-                        bool isValid = string.Equals(pasd, hashpass, StringComparison.Ordinal);
+                            gg.Parameters.AddWithValue("@L", Login);
+                            var value = await gg.ExecuteScalarAsync().ConfigureAwait(false);
+                            if (value == null || value == DBNull.Value)
+                            {
+                                MessageBox.Show("Пользователь с таким логином не найден! Зарегестрируйтесь!");
+                                return false;
+                            }
+                            string pasd = Convert.ToString(value);
+                            bool isValid = string.Equals(pasd, hashpass, StringComparison.Ordinal);
 
-                        if (!isValid)
-                        {
-                            MessageBox.Show("Неверный пароль!");
-                        }
+                            if (!isValid)
+                            {
+                                MessageBox.Show("Неверный пароль!");
+                            }
 
-                        return isValid;
+                            return isValid;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Ошибка индексации");
+                        return false;
                     }
                 }
                 catch (Exception ex)
@@ -99,9 +107,53 @@ namespace WinFormsApp4
             return false;
         }
 
+        public async Task vakidateuserindex()
+        {
+            try
+            {
+                string dbPath = GetDatabasePath();
+                using (var connect = new SQLiteConnection($"Data Source={dbPath}"))
+                {
+                    await connect.OpenAsync().ConfigureAwait(false);
+                    using (var command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
+                    {
+                        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникло исключение" + ex.Message);
+            }
+        }
+
+        public async Task<bool> vakidateuserindexprovarka()
+        {
+            try
+            {
+                string dbPath = GetDatabasePath();
+                using (var connect = new SQLiteConnection($"Data Source={dbPath}"))
+                { 
+                    await connect.OpenAsync().ConfigureAwait(false);
+                    await vakidateuserindex();
+                    using (var command = new SQLiteCommand("SELECT name FROM sqlite_master WHERE type='index' AND name='IX_Usersss_Login'",connect))
+                    { 
+                       var result =  await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        bool resultt = result != null;
 
 
+                        MessageBox.Show(resultt ? $"✅ Индекс '{result.ToString()}' создан успешно!" : "❌ Индекс не создан");
 
+                        return resultt;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникло исключение" + ex.Message);
+                return false;
+            }
+        }
 
         ////Проверка логина на уникальность
         //public async Task<bool> Loginproverka()

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Aspose.Cells;
+using Aspose.Words.Themes;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -21,9 +23,9 @@ namespace WinFormsApp4
         // порт безопасности 
         private readonly int _port = 587;
         // почта с которой отправляем 
-        private readonly string _gmail = "";
+        private readonly string _gmail = "artem2007yannurow@gmail.com";
         // пароль от почты
-        private readonly string _passwordmail = "";
+        private readonly string _passwordmail = "mdyh mrza nlki drry";
 
         public async Task SendVerificationCodeAsync(string email, int code)
         {
@@ -114,32 +116,45 @@ namespace WinFormsApp4
     // запрос мэйла по логину из бд
     public class EmailSQLitezapros
     {
-        public async Task<string> SQLite(string Login,string dbPath)
+        private string _dbPath;
+        public EmailSQLitezapros()
+        {
+            DBpath(); // Инициализируем путь один раз при создании объекта
+        }
+        public async Task<string> SQLite(string Login, string dbPath)
         {
             try
             {
                 if (!string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(dbPath))
                 {
-                    var DbPath = dbPath;
-                    using (var connectionSqlite = new SQLiteConnection($"Data Source={DbPath}"))
+                    if (await SQLiteindexproverka().ConfigureAwait(false))
                     {
-                        await connectionSqlite.OpenAsync().ConfigureAwait(false);
-
-                        string command = "SELECT Mail FROM Usersss WHERE Login = @L";
-                        using (var newSqlitecommand = new SQLiteCommand(command, connectionSqlite))
+                        var DbPath = dbPath;
+                        using (var connectionSqlite = new SQLiteConnection($"Data Source={DbPath}"))
                         {
-                            newSqlitecommand.Parameters.AddWithValue("@L", Login);
-                            var result = await newSqlitecommand.ExecuteScalarAsync().ConfigureAwait(false);
-                            if (result != null)
+                            await connectionSqlite.OpenAsync().ConfigureAwait(false);
+
+                            string command = "SELECT Mail FROM Usersss WHERE Login = @L";
+                            using (var newSqlitecommand = new SQLiteCommand(command, connectionSqlite))
                             {
-                                return result.ToString();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Пользователь с таким логином не найден");
-                                return "";
+                                newSqlitecommand.Parameters.AddWithValue("@L", Login);
+                                var result = await newSqlitecommand.ExecuteScalarAsync().ConfigureAwait(false);
+                                if (result != null)
+                                {
+                                    return result.ToString();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Пользователь с таким логином не найден");
+                                    return "";
+                                }
                             }
                         }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Ошибка индексации");
+                        return "";
                     }
                 }
                 else
@@ -154,6 +169,61 @@ namespace WinFormsApp4
                 return "";
             }
         }
+
+        public void DBpath()
+        { 
+            Form3 db = new Form3();
+            _dbPath = db.GetDatabasePath();
+        }
+
+        public async Task SQLiteindex()
+        {
+            try
+            {
+                using(var connect = new SQLiteConnection($"Data Source={_dbPath}"))
+                {
+                    await connect.OpenAsync().ConfigureAwait(false);
+                    using (var command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)",connect))
+                    {
+                        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникло исключение1" + ex.Message);
+            }
+        }
+
+        public async Task<bool> SQLiteindexproverka()
+        {
+            try
+            {
+                using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
+                {
+                    await connect.OpenAsync().ConfigureAwait(false);
+
+                    await SQLiteindex().ConfigureAwait(false);
+
+                    using (var command = new SQLiteCommand("SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'IX_Usersss_Login'", connect))
+                    {
+                        var rresult = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                        bool result = rresult != null;
+
+                        MessageBox.Show(result ? $"✅ Индекс '{result.ToString()}' создан успешно!" : "❌ Индекс не создан");
+
+                        return result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникло исключение2" + ex.Message);
+                return false;
+            }
+        }
+
+
     }
     // генерация рандомного кода
     public class Codegeneration
@@ -174,4 +244,3 @@ namespace WinFormsApp4
         }
     }
 }
-
