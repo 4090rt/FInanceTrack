@@ -57,11 +57,14 @@ namespace WinFormsApp4
         {
             private readonly string _dbPath;
             private readonly IHashService _hashService;
+            private static bool _currentindex = false;
+            private static readonly object _lock = new object();
 
             public Realiz(string dbPath, IHashService hashService)
             {
                 _dbPath = dbPath;
                 _hashService = hashService;
+                IsLoginindexAsync().ConfigureAwait(false);
             }
 
             public async Task<bool> SaveUserAsync(string login, string password, string valute, string Mail)
@@ -75,8 +78,6 @@ namespace WinFormsApp4
                     }
                     string hashpass = _hashService.HashPassword(password);
 
-                    if (await Indexproverka().ConfigureAwait(false))
-                    {
                         if (!await IsLoginExistsAsync(login).ConfigureAwait(false))
                         {
                             using var connect = new SQLiteConnection($"Data Source={_dbPath}");
@@ -99,12 +100,7 @@ namespace WinFormsApp4
                         {
                             MessageBox.Show("Такой логин уже существует");
                             return false;
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Индекс НЕ работает");
-                    }
+                        }                 
                 }
                 catch (Exception ex)
                 {
@@ -126,10 +122,8 @@ namespace WinFormsApp4
                             command.Parameters.AddWithValue("@L", login);
                             var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
                             return Convert.ToInt32(result) > 0;
-
                         }
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -146,8 +140,7 @@ namespace WinFormsApp4
                     {
                         await connect.OpenAsync().ConfigureAwait(false);
 
-                        await IsLoginindexAsync().ConfigureAwait(false);
-                        using (var command = new SQLiteCommand("SELECT name FROM sqlite_master WHERE type='index' AND name='IX_Usersss_Login'", connect))
+                        using (var command = new SQLiteCommand("EXPLAIN QUERY PLAN SELECT Login FROM Usersss WHERE Login = 'test'", connect))
                         {
                             var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
                             bool index = result != null;
@@ -166,11 +159,17 @@ namespace WinFormsApp4
 
             public async Task IsLoginindexAsync()
             {
+                if (_currentindex) return;
+                lock (_lock)
+                {
+                    if (_currentindex) return;
+                    _currentindex = true;
+                }
                 using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                 {
                     await connect.OpenAsync().ConfigureAwait(false);
 
-                    using (var command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
+                    using (var command = new SQLiteCommand("CREATE  INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
                     {
                          await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     }

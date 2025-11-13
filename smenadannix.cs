@@ -1,7 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Aspose.Words.Themes;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.VisualBasic.Logging;
 using ScottPlot.Hatches;
+using System;
 using System.Data.SQLite;
+using System.Numerics;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 namespace WinFormsApp4
 {
@@ -20,9 +25,15 @@ namespace WinFormsApp4
         public class PokazLogina
         {
             private string _dbPath;
-
+            private static bool _currentindex = false;
+            private static readonly object _lock = new object();
+            public PokazLogina()
+            {
+                usepathindex();
+                Indexcreate().ConfigureAwait(false);
+            }
             public void usepathindex()
-            { 
+            {
                 Form3 form = new Form3();
                 _dbPath = form.GetDatabasePath();
             }
@@ -41,11 +52,6 @@ namespace WinFormsApp4
                         {
                             try
                             {
-                                using (var command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)", connect))
-                                {
-                                    await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                }
-
                                 using (var newcommand = new SQLiteCommand("SELECT Login FROM Usersss WHERE Login = @L", connect))
                                     {
                                         newcommand.Parameters.AddWithValue("@L", Login);
@@ -73,6 +79,33 @@ namespace WinFormsApp4
                     return false.ToString();
                 }
         }
+
+            private async Task Indexcreate()
+            {
+                if (_currentindex) return;
+
+                lock (_lock)
+                {
+                    if (_currentindex) return;
+                    _currentindex = true;
+                }
+                try
+                {
+                    using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
+                    {
+                        await connect.OpenAsync().ConfigureAwait(false);
+                        using (var command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS IX_Usersss_Login_Valute ON Usersss(Login)", connect))
+                        {
+                            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Возникло исключение1:" + ex.Message);
+                }
+            }
+
             // ПРОВЕРКА ИНДЕКСА
             public async Task<bool> IsIndexWorkingAsync()
             {
@@ -81,11 +114,10 @@ namespace WinFormsApp4
                     string testLogin = "test_user_123";
                     using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                     {
-                        await connect.OpenAsync();
+                        await connect.OpenAsync().ConfigureAwait(false);
 
-                        using (var command = new SQLiteCommand(
-                            "SELECT name FROM sqlite_master WHERE type='index' AND name='IX_Usersss_Login'",
-                            connect))
+                        using (var command = new SQLiteCommand("EXPLAIN QUERY PLAN SELECT Login FROM Usersss WHERE Login = 'test'",
+                    connect))
                         {
                             var indexName = await command.ExecuteScalarAsync().ConfigureAwait(false);
                             bool indexExists = indexName != null;
@@ -98,7 +130,7 @@ namespace WinFormsApp4
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Возникло исключение:" + ex.Message);
+                    MessageBox.Show("Возникло исключение2:" + ex.Message);
                     return false;
                 }
             }
@@ -200,10 +232,11 @@ namespace WinFormsApp4
             string Valute = comboBox1.Text;
             string Login = GlobalData.CurrentLogin;
             string Password = GlobalData.CurrentPassword;
-            Form3 form = new Form3();
-            var userproverka = form.vakidateuser(Login, Password);
+            validate valid = new validate();
+            Form3 from = new Form3();
+            var userproverka = valid.vakidateuser(Login, Password);
             string newvalute = comboBox1.Text;
-            string dbPath = form.GetDatabasePath();
+            string dbPath = from.GetDatabasePath();
 
 
             if (await userproverka)
@@ -263,10 +296,12 @@ namespace WinFormsApp4
             string Login = GlobalData.CurrentLogin;
             string Password = GlobalData.CurrentPassword;
             Form3 form = new Form3();
+            var A = form.Validate();
             validpassword validpass = new validpassword();
             var proverpapass = validpass.Passwortd(Passwordd);
             string dbPath = form.GetDatabasePath();
-            var userproverka = form.vakidateuser(Login, Password);
+            validate valid = new validate();
+            var userproverka = valid.vakidateuser(Login, Password);
             string hashpas = form.hashpqpass(Passwordd);
 
             if (await userproverka)

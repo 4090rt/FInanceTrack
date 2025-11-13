@@ -117,9 +117,12 @@ namespace WinFormsApp4
     public class EmailSQLitezapros
     {
         private string _dbPath;
+        private static bool _currentindex = false;
+        private static readonly object _lock = new object();
         public EmailSQLitezapros()
         {
             DBpath(); // Инициализируем путь один раз при создании объекта
+            SQLiteindex().ConfigureAwait(false);
         }
         public async Task<string> SQLite(string Login, string dbPath)
         {
@@ -127,34 +130,26 @@ namespace WinFormsApp4
             {
                 if (!string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(dbPath))
                 {
-                    if (await SQLiteindexproverka().ConfigureAwait(false))
+                    var DbPath = dbPath;
+                    using (var connectionSqlite = new SQLiteConnection($"Data Source={DbPath}"))
                     {
-                        var DbPath = dbPath;
-                        using (var connectionSqlite = new SQLiteConnection($"Data Source={DbPath}"))
-                        {
-                            await connectionSqlite.OpenAsync().ConfigureAwait(false);
+                        await connectionSqlite.OpenAsync().ConfigureAwait(false);
 
-                            string command = "SELECT Mail FROM Usersss WHERE Login = @L";
-                            using (var newSqlitecommand = new SQLiteCommand(command, connectionSqlite))
+                        string command = "SELECT Mail FROM Usersss WHERE Login = @L";
+                        using (var newSqlitecommand = new SQLiteCommand(command, connectionSqlite))
+                        {
+                            newSqlitecommand.Parameters.AddWithValue("@L", Login);
+                            var result = await newSqlitecommand.ExecuteScalarAsync().ConfigureAwait(false);
+                            if (result != null)
                             {
-                                newSqlitecommand.Parameters.AddWithValue("@L", Login);
-                                var result = await newSqlitecommand.ExecuteScalarAsync().ConfigureAwait(false);
-                                if (result != null)
-                                {
-                                    return result.ToString();
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Пользователь с таким логином не найден");
-                                    return "";
-                                }
+                                return result.ToString();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Пользователь с таким логином не найден");
+                                return "";
                             }
                         }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Ошибка индексации");
-                        return "";
                     }
                 }
                 else
@@ -178,21 +173,29 @@ namespace WinFormsApp4
 
         public async Task SQLiteindex()
         {
-            try
+            if (_currentindex) return;
+
+            lock (_lock)
             {
-                using(var connect = new SQLiteConnection($"Data Source={_dbPath}"))
+                if (_currentindex) return;
+                _currentindex = true;
+            }
+                try
                 {
-                    await connect.OpenAsync().ConfigureAwait(false);
-                    using (var command = new SQLiteCommand("CREATE UNIQUE INDEX IF NOT EXISTS IX_Usersss_Login ON Usersss(Login)",connect))
+                    using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                     {
-                        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        await connect.OpenAsync().ConfigureAwait(false);
+                        using (var command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS IX_Usersss_Login_Mail ON Usersss(Login) INCLUDE (Mail)", connect))
+                        {
+                            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Возникло исключение1" + ex.Message);
-            }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Возникло исключение1" + ex.Message);
+                }
+            
         }
 
         public async Task<bool> SQLiteindexproverka()
@@ -203,9 +206,7 @@ namespace WinFormsApp4
                 {
                     await connect.OpenAsync().ConfigureAwait(false);
 
-                    await SQLiteindex().ConfigureAwait(false);
-
-                    using (var command = new SQLiteCommand("SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'IX_Usersss_Login'", connect))
+                    using (var command = new SQLiteCommand("EXPLAIN QUERY PLAN SELECT Mail FROM Usersss WHERE Login = @Login", connect))
                     {
                         var rresult = await command.ExecuteScalarAsync().ConfigureAwait(false);
                         bool result = rresult != null;
