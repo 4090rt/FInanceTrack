@@ -1,18 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SQLite;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WinFormsApp4
 {
@@ -189,7 +176,7 @@ namespace WinFormsApp4
 
         private async void linkLabel2_LinkClicked_1(object sender, LinkLabelLinkClickedEventArgs e)
         {
-          
+
             try
             {
                 Form3 form = new Form3();
@@ -201,15 +188,56 @@ namespace WinFormsApp4
                 // Получаем курсы валют
                 try
                 {
+                    Valuteformat format = new Valuteformat();
                     var currencyInter = await CurrencyFactory.CreateCurrencyServiceAsync(userCurrency);
                     string currencyRates = await currencyInter.valutapros(userCurrency);
-                    if (!string.IsNullOrEmpty(currencyRates))
+                    if (userCurrency == "USD")
                     {
-                        MessageBox.Show(currencyRates, $"Курсы валют для {userCurrency}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (!string.IsNullOrEmpty(currencyRates))
+                        {
+                            var forma = Valutessscrypt.USD;
+                            var cryptoService = format.Valutecrypt(forma);
+                            var result = await cryptoService.Courcevalutecrypt();
+
+                            MessageBox.Show(result);
+                            MessageBox.Show(currencyRates, $"Курсы валют для {userCurrency}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Не удалось получить курсы валют", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
-                    else
+
+                    if (userCurrency == "EUR")
                     {
-                        MessageBox.Show("Не удалось получить курсы валют", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        if (!string.IsNullOrEmpty(currencyRates))
+                        {
+                            var forma = Valutessscrypt.EUR;
+                            var cryptoservice = format.Valutecrypt(forma);
+                            var result = await cryptoservice.Courcevalutecrypt();
+                            MessageBox.Show(currencyRates, $"Курсы валют для {userCurrency}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show(result.ToString());
+                        }
+                        else
+                        {
+                            MessageBox.Show("Не удалось получить курсы валют", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+
+                    if (userCurrency == "RUB")
+                    {
+                        if (!string.IsNullOrEmpty(currencyRates))
+                        {
+                            var forma = Valutessscrypt.RUB;
+                            var cryptoservice = format.Valutecrypt(forma);
+                            var result = await cryptoservice.Courcevalutecrypt();
+                            MessageBox.Show(currencyRates, $"Курсы валют для {userCurrency}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show(result.ToString() + $"умножьте на {currencyRates}");
+                        }
+                        else
+                        {
+                            MessageBox.Show("Не удалось получить курсы валют", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -225,7 +253,12 @@ namespace WinFormsApp4
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Logout(); 
+            Logout();
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
         }
     }
 }
