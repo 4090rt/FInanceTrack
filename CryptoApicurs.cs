@@ -25,16 +25,19 @@ namespace WinFormsApp4
     {
         public async Task<string> Courcevalutecrypt()
         {
+            var pool = new PoolObjectHTTP();
+            HttpClient client = null;
+            var pool2 = new PoolObjectsJson1();
+            JsonDocument json = null;
             string URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd";
             try
             {
-                using (HttpClient http = new HttpClient())
-                {
-                    http.DefaultRequestHeaders.Add("Accept", "application/json");
-                    http.DefaultRequestHeaders.Add("Language", "ru");
-                    http.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-                    http.DefaultRequestHeaders.AcceptLanguage.ParseAdd("ry-Ru,ry;q=0.9,en;q=0.8");
-                    HttpResponseMessage responseMessage = await http.GetAsync(URL).ConfigureAwait(false);
+                    client = pool.Connect();               
+                    client.DefaultRequestHeaders.Add("Accept", "application/json");
+                    client.DefaultRequestHeaders.Add("Language", "ru");
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                    client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("ry-Ru,ry;q=0.9,en;q=0.8");
+                    HttpResponseMessage responseMessage = await client.GetAsync(URL).ConfigureAwait(false);
                     responseMessage.EnsureSuccessStatusCode();
                     if (responseMessage.IsSuccessStatusCode)
                     {
@@ -46,8 +49,7 @@ namespace WinFormsApp4
                         }
                         try
                         {
-                            using (JsonDocument json = JsonDocument.Parse(contentjson))
-                            {
+                                json = pool2.Usings(contentjson);
                                 JsonElement root = json.RootElement;
                                 StringBuilder builder = new StringBuilder();
 
@@ -55,26 +57,32 @@ namespace WinFormsApp4
                                 builder.AppendLine($"Ethereum: {root.GetProperty("ethereum").GetProperty("usd").GetDecimal()} USD");
                                 builder.AppendLine($"Tether: {root.GetProperty("tether").GetProperty("usd").GetDecimal()} USD");
 
-                                return builder.ToString();
-                            }
+                                return builder.ToString();                           
                         }
                         catch (Exception ex)
-                        { 
+                        {
                             MessageBox.Show("Ошибка парсинга" + ex.Message);
                             return "";
+                        }
+                        finally
+                        {
+                            pool2.CloseUsings(json);
                         }
                     }
                     else
                     {
                         MessageBox.Show("Ошибка получения курса");
                         return "";
-                    }
-                }
+                    }               
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Возникла Ошибка получения курса:" + ex.Message);
                 return "";
+            }
+            finally
+            {
+                pool.CloseConnect(client);
             }
         }
     }
@@ -83,17 +91,20 @@ namespace WinFormsApp4
     public class CryptoApicursEUR : Inter
     {
         public async Task<string> Courcevalutecrypt()
-        { 
-         string URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=eur";
+        {
+            var pool = new PoolObjectHTTP();
+            HttpClient client = null;
+            var pool2 = new PoolObjectsJson2();
+            JsonDocument json = null;
+            string URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=eur";
             try
             {
-                using (HttpClient http = new HttpClient())
-                {
-                    http.DefaultRequestHeaders.Add("Accept", "application/json");
-                    http.DefaultRequestHeaders.Add("Language", "ru");
-                    http.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-                    http.DefaultRequestHeaders.AcceptLanguage.ParseAdd("ry-Ru,ry;q=0.9,en;q=0.8");
-                    HttpResponseMessage responseMessage = await http.GetAsync(URL).ConfigureAwait(false);
+                client = pool.Connect();
+                    client.DefaultRequestHeaders.Add("Accept", "application/json");
+                    client.DefaultRequestHeaders.Add("Language", "ru");
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                    client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("ry-Ru,ry;q=0.9,en;q=0.8");
+                    HttpResponseMessage responseMessage = await client.GetAsync(URL).ConfigureAwait(false);
                     responseMessage.EnsureSuccessStatusCode();
                     if (responseMessage.IsSuccessStatusCode)
                     {
@@ -105,35 +116,41 @@ namespace WinFormsApp4
                                 MessageBox.Show("Не удалос получить данные");
                                 return "";
                             }
-                            using (JsonDocument json = JsonDocument.Parse(contentjson))
-                            {
-                                JsonElement root = json.RootElement;
-                                StringBuilder builder = new StringBuilder();
+                            json = pool2.Using(contentjson);
+                            JsonElement root = json.RootElement;
+                            StringBuilder builder = new StringBuilder();
 
-                                builder.AppendLine($"Bitcoin: {root.GetProperty("bitcoin").GetProperty("eur").GetDecimal()} EUR");
-                                builder.AppendLine($"Ethereum: {root.GetProperty("ethereum").GetProperty("eur").GetDecimal()} EUR");
-                                builder.AppendLine($"Tether: {root.GetProperty("tether").GetProperty("eur").GetDecimal()} EUR");
+                            builder.AppendLine($"Bitcoin: {root.GetProperty("bitcoin").GetProperty("eur").GetDecimal()} EUR");
+                            builder.AppendLine($"Ethereum: {root.GetProperty("ethereum").GetProperty("eur").GetDecimal()} EUR");
+                            builder.AppendLine($"Tether: {root.GetProperty("tether").GetProperty("eur").GetDecimal()} EUR");
 
-                                return builder.ToString();
-                            }
+                            return builder.ToString();
+
                         }
                         catch (Exception ex)
                         {
                             MessageBox.Show("Ошибка парсинга" + ex.Message);
                             return "";
                         }
-                    }
+                        finally
+                        {
+                            pool2.UsingClose(json);
+                        }
+                        }
                     else
                     {
                         MessageBox.Show("Ошибка получения курса");
                         return "";
                     }
-                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Возникла Ошибка получения курса:" + ex.Message);
                 return "";
+            }
+            finally
+            {
+                pool.CloseConnect(client);
             }
         }
     }
@@ -142,16 +159,23 @@ namespace WinFormsApp4
     {
         public async Task<string> Courcevalutecrypt()
         {
+            var pool = new PoolObjectHTTP();
+            var pool2 = new PoolObjectsJson3();
+            JsonDocument json = null;
+            HttpClient client = null;
             string URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=eur";
             try
             {
-                using (HttpClient http = new HttpClient())
-                { 
-                    HttpResponseMessage responseMessage = await http.GetAsync(URL).ConfigureAwait(false);
+                client = pool.Connect();
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("Language", "ru");
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("ry-Ru,ry;q=0.9,en;q=0.8");
+                HttpResponseMessage responseMessage = await client.GetAsync(URL).ConfigureAwait(false);
                     responseMessage.EnsureSuccessStatusCode();
                     if (responseMessage.IsSuccessStatusCode)
                     {
-                        var contentjson = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        string contentjson = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                         if (contentjson == null)
                         {
                             MessageBox.Show("Не удалос получить данные");
@@ -159,35 +183,40 @@ namespace WinFormsApp4
                         }
                         try
                         {
-                            using (JsonDocument json = JsonDocument.Parse(contentjson))
-                            {
-                                JsonElement root = json.RootElement;
-                                StringBuilder builder = new StringBuilder();
+                            json = pool2.Using(contentjson);
+                            JsonElement root = json.RootElement;
+                            StringBuilder builder = new StringBuilder();
 
-                                builder.AppendLine($"Bitcoin: {root.GetProperty("bitcoin").GetProperty("eur").GetDecimal()} RUB");
-                                builder.AppendLine($"Ethereum: {root.GetProperty("ethereum").GetProperty("eur").GetDecimal()} RUB");
-                                builder.AppendLine($"Tether: {root.GetProperty("tether").GetProperty("eur").GetDecimal()} RUB");
+                            builder.AppendLine($"Bitcoin: {root.GetProperty("bitcoin").GetProperty("eur").GetDecimal()} RUB");
+                            builder.AppendLine($"Ethereum: {root.GetProperty("ethereum").GetProperty("eur").GetDecimal()} RUB");
+                            builder.AppendLine($"Tether: {root.GetProperty("tether").GetProperty("eur").GetDecimal()} RUB");
 
-                                return builder.ToString();
-                            }
+                            return builder.ToString();
                         }
                         catch (Exception ex)
                         {
                             MessageBox.Show("Ошибка парсинга" + ex.Message);
                             return "";
                         }
-                    }
+                        finally
+                        {
+                            pool2.UsingClose(json);
+                        }
+                        }
                     else
                     {
                         MessageBox.Show("Ошибка получения курса");
                         return "";
                     }
-                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Возникла Ошибка получения курса:" + ex.Message);
                 return "";
+            }
+            finally
+            {
+                pool.CloseConnect(client);
             }
         }
 
