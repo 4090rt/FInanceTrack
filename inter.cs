@@ -39,6 +39,10 @@ namespace WinFormsApp4
     {
         public async Task<string> valutezapros(string valute)
         {
+            var pool = new PoolObhectHttpiNTER();
+            HttpClient client = null;
+            var pool2 = new PoolObhectJsonInter1();
+            JsonDocument document = null;
             string Apikey = "cf64a04e84d8235680fdfa09";
             string[] targetCurrencies = { $"{valute}" };
             if (valute == "RUB")
@@ -48,18 +52,17 @@ namespace WinFormsApp4
 
                 try
                 {
-                    using (HttpClient client = new HttpClient())
+                    client = pool.Connect();
+                    foreach (string basecyrens in baseCurrencies)
                     {
-                        foreach (string basecyrens in baseCurrencies)
+                        string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
+                        HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
+                        recpon.EnsureSuccessStatusCode();
+                        string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        try
                         {
-                            string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
-                            HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
-                            recpon.EnsureSuccessStatusCode();
-                            string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                            using (JsonDocument json = JsonDocument.Parse(jsconcl))
-                            {
-                                JsonElement root = json.RootElement;
+                            document = pool2.Connect(jsconcl);
+                                JsonElement root = document.RootElement;
                                 if (root.TryGetProperty("result", out JsonElement result) && result.GetString() == "success")
                                 {
                                     JsonElement jsom = root.GetProperty("conversion_rates");
@@ -79,24 +82,25 @@ namespace WinFormsApp4
                                 {
                                     builder.AppendLine($"Ошибка для {basecyrens}: {root.GetProperty("error-type").GetString()}");
                                 }
-                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Ошибка парсинга" + ex.Message);
+                        }
+                        finally
+                        {
+                            pool2.Close(document);
                         }
                     }
-                }
-                catch (HttpRequestException ex)
-                {
-                    MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка");
-                    return "";
-                }
-                catch (JsonException ex)
-                {
-                    MessageBox.Show($"Ошибка парсинга JSON: {ex.Message}", "Ошибка");
-                    return "";
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Непредвиденная ошибка: {ex.Message}", "Ошибка");
                     return "";
+                }
+                finally
+                {
+                    pool.Close(client);
                 }
                 return builder.ToString();
             }
@@ -112,6 +116,10 @@ namespace WinFormsApp4
     {
         public async Task<string> valutezapros(string valute)
         {
+            var pool2 = new PoolObhectJsonInter2();
+            JsonDocument document = null;
+            var pool = new PoolObhectHttpiNTER();
+            HttpClient client = null;
             string Apikey = "cf64a04e84d8235680fdfa09";
             string[] targetCurrencies = { $"{valute}" };
             if (valute == "USD")
@@ -120,18 +128,17 @@ namespace WinFormsApp4
                 string[] baseCurrencies = { "EUR", "RUB" };
                 try
                 {
-                    using (HttpClient client = new HttpClient())
+                    client = pool.Connect();
+                    foreach (string basecyrens in baseCurrencies)
                     {
-                        foreach (string basecyrens in baseCurrencies)
+                        string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
+                        HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
+                        recpon.EnsureSuccessStatusCode();
+                        string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        try
                         {
-                            string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
-                            HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
-                            recpon.EnsureSuccessStatusCode();
-                            string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                            using (JsonDocument json = JsonDocument.Parse(jsconcl))
-                            {
-                                JsonElement root = json.RootElement;
+                            document = pool2.Connect(jsconcl);
+                                JsonElement root = document.RootElement;
                                 if (root.TryGetProperty("result", out JsonElement result) && result.GetString() == "success")
                                 {
                                     JsonElement jsom = root.GetProperty("conversion_rates");
@@ -150,21 +157,25 @@ namespace WinFormsApp4
                                 {
                                     builder.AppendLine($"Ошибка для {basecyrens}: {root.GetProperty("error-type").GetString()}");
                                 }
-                            }
+                           
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Ошибка парсинга JSON: {ex.Message}", "Ошибка");
+                        }
+                        finally
+                        {
+                            pool2.close(document);
                         }
                     }
-                }
-                catch (HttpRequestException ex)
-                {
-                    MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка");
-                }
-                catch (JsonException ex)
-                {
-                    MessageBox.Show($"Ошибка парсинга JSON: {ex.Message}", "Ошибка");
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Непредвиденная ошибка: {ex.Message}", "Ошибка");
+                }
+                finally
+                {
+                    pool.Close(client);
                 }
                 return builder.ToString();
             }
@@ -180,6 +191,10 @@ namespace WinFormsApp4
 
         public async Task<string> valutezapros(string valute)
         {
+            var pool2 = new PoolObhectJsonInter1();
+            JsonDocument document = null;
+            var pool = new PoolObhectHttpiNTER();
+            HttpClient client = null;
             string Apikey = "cf64a04e84d8235680fdfa09";
             string[] targetCurrencies = { $"{valute}" };
             if (valute == "EUR")
@@ -188,51 +203,53 @@ namespace WinFormsApp4
                 string[] baseCurrencies = { "RUB", "USD" };
                 try
                 {
-                    using (HttpClient client = new HttpClient())
+                    client = pool.Connect();
+                    foreach (string basecyrens in baseCurrencies)
                     {
-                        foreach (string basecyrens in baseCurrencies)
+                        string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
+                        HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
+                        recpon.EnsureSuccessStatusCode();
+                        string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        try
                         {
-                            string URL = $"https://v6.exchangerate-api.com/v6/{Apikey}/latest/{basecyrens}";
-                            HttpResponseMessage recpon = await client.GetAsync(URL).ConfigureAwait(false);
-                            recpon.EnsureSuccessStatusCode();
-                            string jsconcl = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                            using (JsonDocument json = JsonDocument.Parse(jsconcl))
+                            document = pool2.Connect(jsconcl);
+                            JsonElement root = document.RootElement;
+                            if (root.TryGetProperty("result", out JsonElement result) && result.GetString() == "success")
                             {
-                                JsonElement root = json.RootElement;
-                                if (root.TryGetProperty("result", out JsonElement result) && result.GetString() == "success")
+                                JsonElement jsom = root.GetProperty("conversion_rates");
+                                builder.AppendLine($"Курс {basecyrens}");
+                                foreach (string currentt in targetCurrencies)
                                 {
-                                    JsonElement jsom = root.GetProperty("conversion_rates");
-                                    builder.AppendLine($"Курс {basecyrens}");
-                                    foreach (string currentt in targetCurrencies)
+                                    if (jsom.TryGetProperty(currentt, out JsonElement rateElement))
                                     {
-                                        if (jsom.TryGetProperty(currentt, out JsonElement rateElement))
-                                        {
-                                            double rate = rateElement.GetDouble();
-                                            builder.AppendLine($"1 {basecyrens} = {rate} {currentt}");
-                                        }
-                                        builder.AppendLine();
+                                        double rate = rateElement.GetDouble();
+                                        builder.AppendLine($"1 {basecyrens} = {rate} {currentt}");
                                     }
-                                }
-                                else
-                                {
-                                    builder.AppendLine($"Ошибка для {basecyrens}: {root.GetProperty("error-type").GetString()}");
+                                    builder.AppendLine();
                                 }
                             }
+                            else
+                            {
+                                builder.AppendLine($"Ошибка для {basecyrens}: {root.GetProperty("error-type").GetString()}");
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            MessageBox.Show($"Ошибка парсинга JSON: {ex.Message}", "Ошибка");
+                        }
+                        finally
+                        {
+                            pool2.Close(document);
                         }
                     }
-                }
-                catch (HttpRequestException ex)
-                {
-                    MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка");
-                }
-                catch (JsonException ex)
-                {
-                    MessageBox.Show($"Ошибка парсинга JSON: {ex.Message}", "Ошибка");
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Непредвиденная ошибка: {ex.Message}", "Ошибка");
+                }
+                finally
+                {
+                    pool.Close(client);
                 }
                 return builder.ToString();
             }
