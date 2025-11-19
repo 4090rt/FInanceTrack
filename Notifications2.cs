@@ -15,16 +15,14 @@ namespace WinFormsApp4
     {
         public async Task Maulmethod()
         {
-            // 1. Проверяем логин
             MessageBox.Show($"Текущий логин: '{GlobalData.CurrentLogin}'");
 
-            // 2. Проверяем индекс
             Notificatoinsbd bd = new Notificatoinsbd();
             await bd.Indexproverka().ConfigureAwait(false);
             var result = await bd.Emaildb().ConfigureAwait(false);
             MessageBox.Show(result.ToString());
             string email = result;
-            // Проверяем, что email не пустой и валиден
+
             if (string.IsNullOrWhiteSpace(email))
             {
                 MessageBox.Show("Email адрес не найден в базе данных");
@@ -46,7 +44,7 @@ namespace WinFormsApp4
         // почта с которой отправляем 
         private readonly string _gmail = "artem2007yannurow@gmail.com";
         // пароль от почты
-        private readonly string _passwordmail = "mdyh mrza nlki drry";
+        private readonly string _passwordmail = "";
 
         public async Task SendMail(string email)
         {
@@ -159,5 +157,6 @@ namespace WinFormsApp4
             }
         }
     }
+
 
 
