@@ -3,14 +3,78 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using WinFormsApp4;
 
 namespace WinFormsApp4
 {
+    public class main
+    {
+        public async Task Maulmethod()
+        {
+            // 1. Проверяем логин
+            MessageBox.Show($"Текущий логин: '{GlobalData.CurrentLogin}'");
+
+            // 2. Проверяем индекс
+            Notificatoinsbd bd = new Notificatoinsbd();
+            await bd.Indexproverka().ConfigureAwait(false);
+            var result = await bd.Emaildb().ConfigureAwait(false);
+            MessageBox.Show(result.ToString());
+            string email = result;
+            // Проверяем, что email не пустой и валиден
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                MessageBox.Show("Email адрес не найден в базе данных");
+                return;
+            }
+            MessageBox.Show("Найден email: " + email);
+            Notifications2 notification = new Notifications2();
+            await notification.SendMail(email).ConfigureAwait(false);
+        }
+    }
+
+
     public class Notifications2
     {
+        // тип почты
+        private readonly string _smtpServer = "smtp.gmail.com";
+        // порт безопасности 
+        private readonly int _port = 587;
+        // почта с которой отправляем 
+        private readonly string _gmail = "artem2007yannurow@gmail.com";
+        // пароль от почты
+        private readonly string _passwordmail = "mdyh mrza nlki drry";
 
+        public async Task SendMail(string email)
+        {
+            try
+            {
+                using var smptclient = new SmtpClient(_smtpServer, _port)
+                {
+                    Credentials = new NetworkCredential(_gmail, _passwordmail),
+                    EnableSsl = true
+                };
+
+                var smptmessage = new MailMessage
+                {
+                    From = new MailAddress(_gmail),
+                    Subject = "gg",
+                    Body = "gg",
+                    IsBodyHtml = false
+                };
+                smptmessage.To.Add(email);
+                await smptclient.SendMailAsync(smptmessage).ConfigureAwait(false);
+                MessageBox.Show("Сообщение отправлено");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Не удалось отправить письмо" + ex.Message);
+            }
+        }
+        }
     }
 
     public class Notificatoinsbd
@@ -24,7 +88,8 @@ namespace WinFormsApp4
         }
         public async Task<string> Emaildb()
         {
-            Form3 form = new Form3();
+        await Emailbdindex().ConfigureAwait(false);
+        Form3 form = new Form3();
             string dbPath = form.GetDatabasePath();
             string Login = GlobalData.CurrentLogin;
             Notifications2PoolConnect pool = new Notifications2PoolConnect(dbPath);
@@ -64,8 +129,8 @@ namespace WinFormsApp4
 
             connect = pool.Connect();
             using (var command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS Login_index ON Usersss(Login)", connect))
-            { 
-                await command.ExecuteScalarAsync().ConfigureAwait(false);
+            {
+                 await command.ExecuteNonQueryAsync().ConfigureAwait(false); 
             }
         }
 
@@ -94,4 +159,5 @@ namespace WinFormsApp4
             }
         }
     }
-}
+
+

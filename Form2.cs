@@ -10,6 +10,7 @@ namespace WinFormsApp4
             InitializeComponent();
             UpdateUserInterface();
             massivoperaciy();
+            notific();
             //MessageBox.Show($"Min: {numericUpDown1.Minimum}, Max: {numericUpDown1.Maximum}");
         }
 
@@ -22,7 +23,11 @@ namespace WinFormsApp4
         }
 
 
-
+        public async Task notific()
+        {
+            main m = new main();
+            await m.Maulmethod().ConfigureAwait(false);
+        }
 
 
 
