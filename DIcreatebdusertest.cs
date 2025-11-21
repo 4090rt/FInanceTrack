@@ -89,8 +89,7 @@ namespace WinFormsApp4
         {
             public string getdbpath()
             {
-                var form3 = new Form3();
-                var resultpath = form3.GetDatabasePath();
+                var resultpath = Form3.GetDatabasePath();
                 return resultpath;
             }
         }

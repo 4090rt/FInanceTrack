@@ -1,4 +1,5 @@
-﻿using Aspose.Pdf.Operators;
+﻿using Aspose.Pdf;
+using Aspose.Pdf.Operators;
 using System.Data.SQLite;
 using System.Security.Cryptography;
 using System.Text;
@@ -6,140 +7,6 @@ using static WinFormsApp4.DIcreatebdusertest;
 
 namespace WinFormsApp4
 {
-
-
-    public class validate
-    {
-        private string _dbpath;
-        private static bool _currentindex = false;
-        private static readonly object _lock = new object();
-
-        public validate()
-        {
-            DbPath();
-            vakidateuserindex().ConfigureAwait(false);
-        }
-        public void DbPath()
-        {
-            Form3 db = new Form3();
-            _dbpath = db.GetDatabasePath();
-        }
-        //валидация(авторизация юзера)
-        public async Task<bool> vakidateuser(string Login, string Password)
-        {
-
-            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
-            {
-                MessageBox.Show("Введите логин и пароль!");
-                return false;
-            }
-
-            if (!File.Exists(_dbpath))
-            {
-                MessageBox.Show("База данных не найдена!");
-                MessageBox.Show("Подождите.. База данных создается");
-                return true;
-            }
-
-            string hashpass;
-            try
-            {
-                Form3 form = new Form3();
-                hashpass = form.hashpqpass(Password);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при обработке пароля: " + ex.Message);
-                return false;
-            }
-
-            using (var das = new SQLiteConnection($"Data Source={_dbpath}"))
-            {
-                await das.OpenAsync().ConfigureAwait(false);
-                try
-                {
-                        using (var gg = new SQLiteCommand("SELECT Password FROM Usersss WHERE Login = @L LIMIT 1", das))
-                        {
-                            gg.Parameters.AddWithValue("@L", Login);
-                            var value = await gg.ExecuteScalarAsync().ConfigureAwait(false);
-                            if (value == null || value == DBNull.Value)
-                            {
-                                MessageBox.Show("Пользователь с таким логином не найден! Зарегестрируйтесь!");
-                                return false;
-                            }
-                            string pasd = Convert.ToString(value);
-                            bool isValid = string.Equals(pasd, hashpass, StringComparison.Ordinal);
-
-                            if (!isValid)
-                            {
-                                MessageBox.Show("Неверный пароль!");
-                            }
-
-                            return isValid;
-                        }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Ошибка при проверке пользователя: " + ex.Message);
-                }
-            }
-            return false;
-        }
-
-        public async Task vakidateuserindex()
-        {
-            if (_currentindex) return;
-
-            lock (_lock)
-            {
-                if (_currentindex) return;
-                _currentindex = true;
-            }
-            try
-            {
-                using (var connect = new SQLiteConnection($"Data Source={_dbpath}"))
-                {
-                    await connect.OpenAsync().ConfigureAwait(false);
-                    using (var command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS IX_Usersss_Login_Password ON Usersss(Login) INCLUDE (Password)", connect))
-                    {
-                        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Возникло исключение" + ex.Message);
-            }
-        }
-
-        public async Task<bool> vakidateuserindexprovarka()
-        {
-            try
-            {
-                using (var connect = new SQLiteConnection($"Data Source={_dbpath}"))
-                {
-                    await connect.OpenAsync().ConfigureAwait(false);
-                    using (var command = new SQLiteCommand("EXPLAIN QUERY PLAN SELECT Password FROM Usersss WHERE Login = 'test'", connect))
-                    {
-                        var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
-                        bool resultt = result != null;
-
-
-                        MessageBox.Show(resultt ? $"✅ Индекс '{result.ToString()}' создан успешно!" : "❌ Индекс не создан");
-
-                        return resultt;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Возникло исключение" + ex.Message);
-                return false;
-            }
-        }
-    }
-
-
     public partial class Form3 : Form
     {
         private reposit.IUser _userRepository;
@@ -148,10 +15,8 @@ namespace WinFormsApp4
             InitializeComponent();
             massiv();
             pictures();
+
         }
-
-
-
         //массив валют
         public void massiv()
         {
@@ -159,7 +24,6 @@ namespace WinFormsApp4
             comboBox2.Items.AddRange(valute);
 
         }
-
 
 
         // работа с элементами формы
@@ -171,59 +35,8 @@ namespace WinFormsApp4
             button2.FlatStyle = FlatStyle.Popup;
         }
 
-      
-
-        ////Проверка логина на уникальность
-        //public async Task<bool> Loginproverka()
-        //{
-        //    string login = textBox1.Text;
-
-        //    if (string.IsNullOrEmpty(login))
-        //    {
-        //        MessageBox.Show("Введите логин!");
-        //        return false;
-        //    }
-        //    try
-        //    {
-        //        string dbPath = GetDatabasePath();
-        //        using (var das = new SQLiteConnection($"Data Source={dbPath}"))
-        //        {
-        //            das.OpenAsync().ConfigureAwait(false);
-        //            using (var commandsql = new SQLiteCommand($"SELECT COUNT(*) FROM Usersss WHERE Login = @L", das))
-        //            {
-        //                commandsql.Parameters.AddWithValue("@L", login);
-        //                var result = await commandsql.ExecuteScalarAsync().ConfigureAwait(false);
-
-        //                if (result == null && result == DBNull.Value)
-        //                {
-        //                    return false;
-        //                }
-        //                int count = Convert.ToInt32(result);
-
-        //                if (count == 0)
-        //                {
-        //                    return true;
-        //                }
-
-        //                if (count <= 1)
-        //                {
-        //                    return false;
-        //                }
-        //                return false;
-        //            }
-
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"Ошибка проверки пароля {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //        return false;
-        //    }
-        //}
-
-
         //хэширование пароля
-        public string hashpqpass(string Password)
+        public static string hashpqpass(string Password)
         {
                 try
                 {
@@ -249,66 +62,8 @@ namespace WinFormsApp4
                 }
         }
 
-
-
-        ////сохранение юзера в базу данных
-        //public async Task<bool> saveUser()
-        //{
-        //    string Login = textBox1.Text;
-        //    string Password = textBox2.Text;
-        //    string valute = comboBox2.Text;
-
-        //    if (await Loginproverka().ConfigureAwait(false))
-        //    {
-        //        if (!string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(valute))
-        //        {
-        //            try
-        //            {
-        //                string hashPassword = hashpqpass(Password);
-        //                try
-        //                {
-        //                    string dbPath = GetDatabasePath();
-        //                    using (var das = new SQLiteConnection($"Data Source={dbPath}"))
-        //                    {
-        //                        await das.OpenAsync().ConfigureAwait(false);
-        //                        var dass = new SQLiteCommand($"INSERT INTO [Usersss] (Login,Password,Valute) VALUES (@L,@P,@V)", das);
-        //                        dass.Parameters.AddWithValue("@L", Login);
-        //                        dass.Parameters.AddWithValue("@P", hashPassword);
-        //                        dass.Parameters.AddWithValue("@V", valute);
-        //                        await dass.ExecuteNonQueryAsync().ConfigureAwait(false);
-        //                        MessageBox.Show("Данные сохранены");
-        //                        return true;
-        //                    }
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    MessageBox.Show($"Ошибка сохранения данных {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                    return false;
-        //                }
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                MessageBox.Show("Ошибка при хэшировании данных: " + ex.Message);
-        //                return false;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            MessageBox.Show("Заполните все поля", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            return false;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show("Такой логин уже существует! Выберите другой логин.");
-        //        return false;
-        //    }
-        //}
-
-
-
         // получение все возможных путей расположения бд
-        public string GetDatabasePath()
+        public static string GetDatabasePath()
         {
             try
             {
@@ -466,8 +221,14 @@ namespace WinFormsApp4
             }
         }
 
+        public async Task Notificationvxod()
+        {
+            string Login = textBox1.Text;
+            main mai = new main();
+            await mai.Maulmethod2(Login).ConfigureAwait(false);
+        }
 
-
+       
         //авторизация юзера
         private async void button2_Click(object sender, EventArgs e)
         {
@@ -533,6 +294,137 @@ namespace WinFormsApp4
         public static bool IsUserLoggedInPas()
         {
             return !string.IsNullOrEmpty(CurrentPassword);
+        }
+    }
+
+    public class validate
+    {
+        private string _dbpath;
+        private static bool _currentindex = false;
+        private static readonly object _lock = new object();
+
+        public validate()
+        {
+            DbPath();
+            vakidateuserindex().ConfigureAwait(false);
+        }
+        public void DbPath()
+        {
+
+            _dbpath = Form3.GetDatabasePath();
+        }
+        //валидация(авторизация юзера)
+        public async Task<bool> vakidateuser(string Login, string Password)
+        {
+            Form3 form = new Form3();
+            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
+            {
+                MessageBox.Show("Введите логин и пароль!");
+                return false;
+            }
+
+            if (!File.Exists(_dbpath))
+            {
+                MessageBox.Show("База данных не найдена!");
+                MessageBox.Show("Подождите.. База данных создается");
+                return true;
+            }
+
+            string hashpass;
+            try
+            {
+                hashpass = Form3.hashpqpass(Password);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при обработке пароля: " + ex.Message);
+                return false;
+            }
+
+            using (var das = new SQLiteConnection($"Data Source={_dbpath}"))
+            {
+                await das.OpenAsync().ConfigureAwait(false);
+                try
+                {
+                    using (var gg = new SQLiteCommand("SELECT Password FROM Usersss WHERE Login = @L LIMIT 1", das))
+                    {
+                        gg.Parameters.AddWithValue("@L", Login);
+                        var value = await gg.ExecuteScalarAsync().ConfigureAwait(false);
+                        if (value == null || value == DBNull.Value)
+                        {
+                            MessageBox.Show("Пользователь с таким логином не найден! Зарегестрируйтесь!");
+                            return false;
+                        }
+                        string pasd = Convert.ToString(value);
+                        bool isValid = string.Equals(pasd, hashpass, StringComparison.Ordinal);
+
+                        if (!isValid)
+                        {
+                            MessageBox.Show("Неверный пароль!");
+                            await  form.Notificationvxod();
+
+                        }
+                        return isValid;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при проверке пользователя: " + ex.Message);
+                }
+            }
+            return false;
+        }
+
+        public async Task vakidateuserindex()
+        {
+            if (_currentindex) return;
+
+            lock (_lock)
+            {
+                if (_currentindex) return;
+                _currentindex = true;
+            }
+            try
+            {
+                using (var connect = new SQLiteConnection($"Data Source={_dbpath}"))
+                {
+                    await connect.OpenAsync().ConfigureAwait(false);
+                    using (var command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS IX_Usersss_Login_Password ON Usersss(Login) INCLUDE (Password)", connect))
+                    {
+                        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникло исключение" + ex.Message);
+            }
+        }
+
+        public async Task<bool> vakidateuserindexprovarka()
+        {
+            try
+            {
+                using (var connect = new SQLiteConnection($"Data Source={_dbpath}"))
+                {
+                    await connect.OpenAsync().ConfigureAwait(false);
+                    using (var command = new SQLiteCommand("EXPLAIN QUERY PLAN SELECT Password FROM Usersss WHERE Login = 'test'", connect))
+                    {
+                        var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                        bool resultt = result != null;
+
+
+                        MessageBox.Show(resultt ? $"✅ Индекс '{result.ToString()}' создан успешно!" : "❌ Индекс не создан");
+
+                        return resultt;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникло исключение" + ex.Message);
+                return false;
+            }
         }
     }
 }

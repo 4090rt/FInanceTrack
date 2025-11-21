@@ -38,8 +38,7 @@ namespace WinFormsApp4
                 // получили путь
                 try
                 {
-                    Form3 form3 = new Form3();
-                    var dbpat = form3.GetDatabasePath();
+                    var dbpat = Form3.GetDatabasePath();
                     dbPath = dbpat;
                 }
                 catch (Exception ex)
@@ -106,8 +105,7 @@ namespace WinFormsApp4
         {
             try
             {
-                var form3 = new Form3();
-                var formm3 = form3.GetDatabasePath();
+                var formm3 = Form3.GetDatabasePath();
                 string dbPath = formm3;
                 string Login = _Login;
                 try
@@ -163,7 +161,8 @@ namespace WinFormsApp4
                                 {
                                     // обновляем хэш пароля в базе  и открываем след форму
                                     await updatepassword(hashpass);
-                                    MessageBox.Show("Пароль успешно изменен");
+                                    var notification = new Notral3();
+                                    notification.Not();
                                     Form2 form2 = new Form2();
                                     form2.Show();
                                     this.Hide();

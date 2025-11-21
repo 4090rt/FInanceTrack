@@ -123,6 +123,7 @@ namespace WinFormsApp4
         {
             DBpath(); // Инициализируем путь один раз при создании объекта
             SQLiteindex().ConfigureAwait(false);
+            SQLiteindexproverka().ConfigureAwait(false);
         }
         public async Task<string> SQLite(string Login, string dbPath)
         {
@@ -167,8 +168,7 @@ namespace WinFormsApp4
 
         public void DBpath()
         { 
-            Form3 db = new Form3();
-            _dbPath = db.GetDatabasePath();
+            _dbPath = Form3.GetDatabasePath();
         }
 
         public async Task SQLiteindex()
@@ -185,7 +185,7 @@ namespace WinFormsApp4
                     using (var connect = new SQLiteConnection($"Data Source={_dbPath}"))
                     {
                         await connect.OpenAsync().ConfigureAwait(false);
-                        using (var command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS IX_Usersss_Login_Mail ON Usersss(Login) INCLUDE (Mail)", connect))
+                        using (var command = new SQLiteCommand("CREATE INDEX IF NOT EXISTS IX_Usersss_Login_Mail ON Usersss(Login, Mail)", connect))
                         {
                             await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                         }
@@ -208,6 +208,7 @@ namespace WinFormsApp4
 
                     using (var command = new SQLiteCommand("EXPLAIN QUERY PLAN SELECT Mail FROM Usersss WHERE Login = @Login", connect))
                     {
+                        command.Parameters.AddWithValue("@Login", "test_login");
                         var rresult = await command.ExecuteScalarAsync().ConfigureAwait(false);
                         bool result = rresult != null;
 

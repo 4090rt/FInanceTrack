@@ -11,6 +11,7 @@ namespace WinFormsApp4
             UpdateUserInterface();
             massivoperaciy();
             notific();
+            weather();
             //MessageBox.Show($"Min: {numericUpDown1.Minimum}, Max: {numericUpDown1.Maximum}");
         }
 
@@ -25,17 +26,22 @@ namespace WinFormsApp4
 
         public async Task notific()
         {
+            
             main m = new main();
-            await m.Maulmethod().ConfigureAwait(false);
+            await m.Maulmethod1().ConfigureAwait(false);
         }
 
-
+        public async Task weather()
+        { 
+            WeatherHttp weat = new WeatherHttp();
+            await weat.Weather().ConfigureAwait(false);
+        }
 
 
         //информация о текущем пользователе
         private void UpdateUserInterface()
         {
-            if (GlobalData.IsUserLoggedIn() && GlobalData.IsUserLoggedInPas())
+            if (GlobalData.IsUserLoggedIn() &&GlobalData.IsUserLoggedInPas())
             {
                 this.Text = $"Транзакции - Пользователь: {GlobalData.CurrentLogin}";
             }
@@ -184,8 +190,7 @@ namespace WinFormsApp4
 
             try
             {
-                Form3 form = new Form3();
-                string dbPath = form.GetDatabasePath();
+                string dbPath = Form3.GetDatabasePath();
                 // Получаем валюту пользователя
                 var currencyService = new CurrencyService(dbPath);
                 string userCurrency = await currencyService.GetUserCurrencyAsync(GlobalData.CurrentLogin);

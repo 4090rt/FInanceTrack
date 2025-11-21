@@ -31,11 +31,11 @@ namespace WinFormsApp4
             {
                 usepathindex();
                 Indexcreate().ConfigureAwait(false);
+                IsIndexWorkingAsync().ConfigureAwait(false);
             }
             public void usepathindex()
             {
-                Form3 form = new Form3();
-                _dbPath = form.GetDatabasePath();
+                _dbPath = Form3.GetDatabasePath();
             }
 
             public async Task<string> pokazLogin()
@@ -180,9 +180,8 @@ namespace WinFormsApp4
         public async Task<bool> valutelocal()
         {
             try
-            {
-                Form3 form = new Form3();
-                string dbPath = form.GetDatabasePath();
+            {   
+                string dbPath = Form3.GetDatabasePath();
 
 
                 if (string.IsNullOrEmpty(dbPath))
@@ -233,10 +232,9 @@ namespace WinFormsApp4
             string Login = GlobalData.CurrentLogin;
             string Password = GlobalData.CurrentPassword;
             validate valid = new validate();
-            Form3 from = new Form3();
             var userproverka = valid.vakidateuser(Login, Password);
             string newvalute = comboBox1.Text;
-            string dbPath = from.GetDatabasePath();
+            string dbPath = Form3.GetDatabasePath();
 
 
             if (await userproverka)
@@ -299,10 +297,10 @@ namespace WinFormsApp4
             var A = form.Validate();
             validpassword validpass = new validpassword();
             var proverpapass = validpass.Passwortd(Passwordd);
-            string dbPath = form.GetDatabasePath();
+            string dbPath = Form3.GetDatabasePath();
             validate valid = new validate();
             var userproverka = valid.vakidateuser(Login, Password);
-            string hashpas = form.hashpqpass(Passwordd);
+            string hashpas = Form3.hashpqpass(Passwordd);
 
             if (await userproverka)
             {
