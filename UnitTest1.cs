@@ -17,9 +17,7 @@ namespace TestProjectWinFormsApp4_1_
         [InlineData("123456")]
         public void Test1(string password)
         {
-            var hashr = new Form3();
-
-            string resulthash = hashr.hashpqpass(password);
+            string resulthash = Form3.hashpqpass(password);
 
 
             Assert.NotNull(resulthash);
@@ -34,7 +32,7 @@ namespace TestProjectWinFormsApp4_1_
         public void Test2(string inalidpassword)
         {
             var hash = new Form3();
-            var exception = Assert.Throws<Exception>(() => hash.hashpqpass(inalidpassword));
+            var exception = Assert.Throws<Exception>(() => Form3.hashpqpass(inalidpassword));
 
             Assert.Contains("Ошибка", exception.Message);
 
@@ -46,8 +44,8 @@ namespace TestProjectWinFormsApp4_1_
         {
             var hash = new Form3();
             string password = "dsdsdd";
-            string hash1 = hash.hashpqpass(password);
-            string hash2 = hash.hashpqpass(password);
+            string hash1 = Form3.hashpqpass(password);
+            string hash2 = Form3.hashpqpass(password);
             Assert.Equal(hash1, hash2);
         }
 
@@ -57,8 +55,8 @@ namespace TestProjectWinFormsApp4_1_
             var hash = new Form3();
             string password = "dsdsdd";
             string password2 = "dsdsdsd";
-            string hash1 = hash.hashpqpass(password);
-            string hash2 = hash.hashpqpass(password2);
+            string hash1 = Form3.hashpqpass(password);
+            string hash2 = Form3.hashpqpass(password2);
             Assert.NotEqual(hash1, hash2);
         }
 
