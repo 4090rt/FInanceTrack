@@ -12,6 +12,7 @@ namespace WinFormsApp4
             massivoperaciy();
             notific();
             weather();
+            weather2();
             //MessageBox.Show($"Min: {numericUpDown1.Minimum}, Max: {numericUpDown1.Maximum}");
         }
 
@@ -37,7 +38,11 @@ namespace WinFormsApp4
             await weat.Weather().ConfigureAwait(false);
         }
 
-
+        public async Task weather2()
+        {
+            Weather2 weat = new Weather2();
+            await weat.WEATHER22().ConfigureAwait(false);
+        }
         //информация о текущем пользователе
         private void UpdateUserInterface()
         {
