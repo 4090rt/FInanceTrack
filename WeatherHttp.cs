@@ -22,15 +22,22 @@ namespace WinFormsApp4
 
     }
 
+    public class Weathers
+    {
+        [JsonPropertyName("weather")]
+        public List<Weather> Weather { get; set; }
+    }
+
     public class Weather
     {
-        [JsonPropertyName("weather_txt")]
-        public string weather { get; set; }
-
-
+        [JsonPropertyName("main")]
+        public string main { get; set; }
+        [JsonPropertyName("description")]
+        public string description { get; set; }
     }
     public class WeatherHttp
     {
+        private readonly object _lock = new object();
         public async Task Weather()
         {
             string APIKEY = "818684b83cb44c9f87e6a189bf48bf83";
@@ -55,13 +62,24 @@ namespace WinFormsApp4
                     var ser = JsonSerializer.Deserialize<TimezoneResponse>(result);
 
                     Type type = ser.GetType();
-                    PropertyInfo[] prop = type.GetProperties();
-
-                    foreach (PropertyInfo pop in prop)
-                    { 
-                        object value = pop.GetValue(ser);
-                        //MessageBox.Show($"- {pop.Name} ({pop.PropertyType.Name}): {value ?? "null"}");
+                    PropertyInfo[] prop = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                    var sb =new StringBuilder();
+                    Parallel.ForEach(prop, pro =>
+                    {
+                        object value = pro.GetValue(ser);
+                        lock (_lock)
+                        {
+                            sb.AppendLine($"{pro.Name}: {value}");
+                        }
+                    });
+                    MessageBox.Show(sb.ToString());
+                    if (ser?.Timezone != null)
+                    {
                         MessageBox.Show($"{ser.Timezone}");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Данные о времени отсутствуют");
                     }
                 }
             }
@@ -78,6 +96,7 @@ namespace WinFormsApp4
 
     public class Weather2
     {
+        private readonly object _lock = new object();
         public async Task WEATHER22()
         {
             string city = "Ekaterinburg";
@@ -99,16 +118,28 @@ namespace WinFormsApp4
                 if (recpon.IsSuccessStatusCode)
                 { 
                     var result = await recpon.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var ser = JsonSerializer.Deserialize<Weather>(result);
-                    //MessageBox.Show(result);
-                    Type type = ser.GetType();
-                    PropertyInfo[] prop = type.GetProperties();
+                    var ser = JsonSerializer.Deserialize<Weathers>(result);
+                    MessageBox.Show(result);
 
-                    foreach (PropertyInfo pop in prop)
-                    { 
-                        object value = pop.GetValue(ser);
-                        //MessageBox.Show($"{pop.Name}, {pop.PropertyType.Name}");
-                        MessageBox.Show(ser.weather);
+                    Type type = ser.GetType();
+                    PropertyInfo[] prop = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                    var sb = new StringBuilder();
+                    Parallel.ForEach(prop, pro =>
+                    {
+                        var value = pro.GetValue(ser);
+                        lock (_lock)
+                        {
+                            sb.AppendLine($"{pro.Name}: {value}");
+                        }
+                    });
+                    MessageBox.Show(sb.ToString());
+                    if (ser?.Weather != null && ser.Weather.Count > 0)
+                    {
+                        MessageBox.Show($"{ser.Weather[0].main} {ser.Weather[0].description}");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Данные о погоде отсутствуют");
                     }
                 }
             }
